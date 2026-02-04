@@ -1,0 +1,141 @@
+\documentclass[fleqn,10pt]{olplainarticle}
+% Use option lineno for line numbers 
+
+\title{ Evaluating the Impact of Adapter-Based Fine-Tuning on Structured Parsing Performance in Large Language Models}
+
+\author[1]{Ratomir Karlović}
+\author[2]{Luka Sever}
+\affil[1]{Address of first author}
+\affil[2]{Address of second author}
+
+\keywords{LLM, Adapters, PEFT}
+
+\begin{abstract}
+Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods,such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
+This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy, consistency, and robustness.
+The experiment uses the same controlled shopping-cart parsing task and dataset of 1000 synthetic commands to ensure direct comparability. Results will quantify the trade-off between computational cost and performance gains, offering evidence-based insights into whether fine-tuning is a justified investment compared to advanced prompt engineering.
+The expected contribution is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.
+
+\end{abstract}
+
+\begin{document}
+
+\flushbottom
+\maketitle
+\thispagestyle{empty}
+
+\section*{Introduction}
+
+The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
+A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
+To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using the LLaMA-3-8B model. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA and its quantized variant (QLoRA) to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
+The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking LLaMA-3 on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
+
+
+\section*{Background and Related Works}
+
+The rapid growth of large language models (LLMs) has necessitated strategies for adapting them efficiently to downstream tasks. Zhiqiang Hu et al. \citep{hu2023llm} introduced LLM-Adapters, a framework for parameter-efficient fine-tuning (PEFT) that integrates Series adapters, Parallel adapters, Prefix-Tuning, and LoRA. Their study demonstrated that smaller LLaMA models (7B and 13B) equipped with optimized adapters could match or surpass the performance of much larger models such as ChatGPT and GPT-3.5, particularly on structured reasoning tasks using datasets like Math10K and Commonsense170K. These findings suggest that adapter-based PEFT can improve structured task accuracy compared to advanced prompting strategies.
+
+Ding et al. \citep{ding2023parameter} proposed a unified framework called delta-tuning, which adjusts only a small fraction of model parameters. Through extensive evaluation on over 100 NLP tasks, they found that delta-tuning achieved performance comparable to full fine-tuning while significantly reducing GPU memory usage and accelerating backpropagation. Larger models not only benefited more from minimal parameter updates but also converged faster, reinforcing the potential of adapter-based methods to enhance task-specific performance efficiently.
+
+Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and IA3. Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
+
+Razuvayevskaya et al. \citep{razuvayevskaya2024comparison} compared parameter-efficient techniques and full fine-tuning for multilingual news classification. Using XLM-RoBERTa Large, they showed that LoRA and bottleneck adapters could reduce trainable parameters by 140–280 times while maintaining competitive accuracy. Their results suggested that PEFT strategies can outperform traditional prompting approaches, especially when sufficient source data is available.
+
+Shin et al. \citep{shin2025prompt} assessed the trade-offs between prompt engineering and fine-tuning for automated code tasks. Their evaluation of GPT-4 against seventeen fine-tuned baselines revealed that while task-specific prompting sometimes outperformed automated methods in code summarization, fine-tuned models were generally superior in code generation. Human-in-the-loop conversational prompting further enhanced outcomes, demonstrating that adapter-based fine-tuning can stabilize and improve output quality over prompting alone.
+
+Ming Gong et al. \citep{gong2025structure} developed structure-learnable adapters, which introduced differentiable gating and sparsity control to dynamically optimize adapter placement and activation paths. Experiments on the Multi-Task NLU Benchmark indicated that this approach not only achieved high accuracy with minimal parameters but also reduced output variability and maintained robustness under noisy conditions, supporting the notion that adapter fine-tuning can yield more consistent outputs than prompting.
+
+Fang and Ye \citep{fangtowards} proposed RFedLR, a robust PEFT framework for federated learning. By selectively updating noise-sensitive parameters and dynamically weighting client updates, RFedLR achieved up to 10.15\% accuracy improvements over state-of-the-art baselines under high-noise conditions while using only 0.1754\% of the trainable parameters. These results reinforce that adapter-based fine-tuning provides more stable and reliable outputs than prompt-based methods, even in decentralized and noisy environments.
+
+Shuo Chen et al. \citep{chen2023benchmarking} benchmarked eleven adaptation methods on vision-language models under textual and visual corruptions. They found that parameter-efficient adapters exhibited higher resilience to input perturbations than full fine-tuning or prompting, although no single method dominated across all datasets. Increasing adaptation data or parameter size did not guarantee robustness, highlighting the importance of careful PEFT design to enhance model stability.
+
+Chen et al. \citep{chen2025evaluation} evaluated prompt engineering for industrial document processing tasks and found that few-shot learning improved reasoning capabilities over zero-shot prompts. However, adapter-based PEFT consistently offered more reliable and less variable outputs, particularly in complex scenarios with noisy OCR inputs.
+
+Kaijie Zhu et al. \citep{zhu2023promptrobust} introduced PromptRobust, a benchmark for adversarial prompt evaluation across multiple LLMs. Their results showed that word-level adversarial prompts caused a 39\% average performance drop, and few-shot prompts exhibited better robustness than zero-shot prompting. The study illustrates that adapter fine-tuning can improve resilience to prompt-based perturbations.
+
+Jaehyung Kim et al. \citep{kim2023roast} presented ROAST, combining adversarial perturbations with selective training to improve robustness across sentiment classification and entailment tasks. ROAST yielded average improvements of 18.39\% and 7.63\% over state-of-the-art baselines, demonstrating that adapter fine-tuning can mitigate input noise effects more effectively than prompting.
+
+Pei et al. \citep{pei2025selfprompt} proposed SelfPrompt, which autonomously evaluates LLM robustness using domain-constrained knowledge graphs and adversarial prompt generation. Their findings indicated that domain-specific adapter fine-tuning enhances robustness in specialized fields like medicine and biology, outperforming prompting strategies alone.
+
+Lin Mu et al. \citep{mu2025robustness} introduced Robustness of Prompting (RoP), a parameter-free method for improving LLM resilience through error correction and guidance prompts. While effective, experiments confirmed that adapter fine-tuning provides superior stability and transferability across architectures, emphasizing the practical value of PEFT in noisy real-world environments.
+
+Sajjadi Mohammadabadi et al. \citep{sajjadi2025survey} surveyed LLM architectures and adaptation methods, emphasizing the efficiency of PEFT, instruction tuning, and RLHF. They noted that adapter-based fine-tuning can deliver significant performance gains relative to prompting, justifying its computational cost in applied settings.
+
+Trad and Chehab \citep{trad2024prompt} studied phishing detection LLMs and found that while refined prompting improved performance, fine-tuned models achieved higher F1-scores and superior reliability, demonstrating that the cost of PEFT is justified when high precision is required.
+
+Pornprasit and Tantithamthavorn \citep{pornprasit2024fine} evaluated LLM-based code review, showing that fine-tuning GPT-3.5 achieved 73–74\% higher Exact Match rates than prompting approaches. Their study confirmed that adapter-based fine-tuning can deliver meaningful gains even with modest training data.
+
+Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting adaptation outcomes with minimal trials. Their results indicated that fine-tuning consistently outperformed in-context learning in medium to high-cost scenarios, supporting the view that adapter PEFT justifies its resource investment by providing predictable and superior performance.
+
+Based on the cumulative evidence from these studies, the overarching goal of this work is to investigate how adapter-based parameter-efficient fine-tuning (PEFT) compares to advanced prompting in terms of structured task accuracy, output stability, robustness, and cost-effectiveness. Accordingly, the following research hypotheses are formulated:
+
+\begin{itemize}
+    \item \textbf{H1:} Adapter-based PEFT improves structured task performance relative to advanced prompting.
+    \item \textbf{H2:} Adapter fine-tuning reduces output variability compared to prompting approaches.
+    \item \textbf{H3:} Adapter fine-tuning enhances robustness to input noise, adversarial perturbations, and paraphrasing relative to prompting.
+    \item \textbf{H4:} Performance gains achieved via adapter-based PEFT justify the computational and resource cost compared to advanced prompting methods.
+\end{itemize}
+
+
+\subsection*{Figures and Tables}
+
+Use the table and tabular commands for basic tables --- see Table~\ref{tab:widgets}, for example. You can upload a figure (JPEG, PNG or PDF) using the project menu. To include it in your document, use the includegraphics command as in the code for Figure~\ref{fig:view} below.
+
+%begin{figure}[ht]
+%\centering
+%\includegraphics[width=0.7\linewidth]{frog}
+%\caption{An example image of a frog.}
+%\label{fig:view}
+%\end{figure}
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{l|r}
+Item & Quantity \\\hline
+Candles & 4 \\
+Fork handles & ?  
+\end{tabular}
+\caption{\label{tab:widgets}An example table.}
+\end{table}
+
+\subsection*{Citations}
+
+LaTeX formats citations and references automatically using the bibliography records in your .bib file, which you can edit via the project menu. Use the cite command for an inline citation, like \cite{lees2010theoretical}, and the citep command for a citation in parentheses \citep{lees2010theoretical}.
+
+\subsection*{Mathematics}
+
+\LaTeX{} is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
+$$S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
+      = \frac{1}{n}\sum_{i}^{n} X_i$$
+denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
+
+\subsection*{Lists}
+
+You can make lists with automatic numbering \dots
+
+\begin{enumerate}[noitemsep] 
+\item Like this,
+\item and like this.
+\end{enumerate}
+\dots or bullet points \dots
+\begin{itemize}[noitemsep] 
+\item Like this,
+\item and like this.
+\end{itemize}
+\dots or with words and descriptions \dots
+\begin{description}
+\item[Word] Definition
+\item[Concept] Explanation
+\item[Idea] Text
+\end{description}
+
+\section*{Acknowledgments}
+
+Additional information can be given in the template, such as to not include funder information in the acknowledgments section.
+
+%\bibliography{sample}
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}
