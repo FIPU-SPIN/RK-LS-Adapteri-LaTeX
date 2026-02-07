@@ -10,6 +10,8 @@
 
 \keywords{LLM, Adapters, PEFT}
 
+\begin{document}
+
 \begin{abstract}
 Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods,such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
 This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy, consistency, and robustness.
@@ -17,8 +19,6 @@ The experiment uses the same controlled shopping-cart parsing task and dataset o
 The expected contribution is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.
 
 \end{abstract}
-
-\begin{document}
 
 \flushbottom
 \maketitle
@@ -134,8 +134,6 @@ You can make lists with automatic numbering \dots
 
 Additional information can be given in the template, such as to not include funder information in the acknowledgments section.
 
-%\bibliography{sample}
-
-\bibliographystyle{plainnat}
+% \bibliographystyle{plainnat}
 \bibliography{references}
 \end{document}
