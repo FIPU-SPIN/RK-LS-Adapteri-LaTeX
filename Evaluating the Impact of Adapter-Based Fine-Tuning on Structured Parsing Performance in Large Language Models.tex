@@ -24,7 +24,7 @@ The expected contribution is a clear, empirical framework for deciding when fine
 \maketitle
 \thispagestyle{empty}
 
-\section*{Introduction}
+\section{Introduction}
 
 The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
 A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
@@ -32,7 +32,7 @@ To address these challenges, this study evaluates the cost-benefit ratio of fine
 The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking LLaMA-3 on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
 
 
-\section*{Background and Related Works}
+\section{Background and Related Works}
 
 The rapid growth of large language models (LLMs) has necessitated strategies for adapting them efficiently to downstream tasks. Zhiqiang Hu et al. \citep{hu2023llm} introduced LLM-Adapters, a framework for parameter-efficient fine-tuning (PEFT) that integrates Series adapters, Parallel adapters, Prefix-Tuning, and LoRA. Their study demonstrated that smaller LLaMA models (7B and 13B) equipped with optimized adapters could match or surpass the performance of much larger models such as ChatGPT and GPT-3.5, particularly on structured reasoning tasks using datasets like Math10K and Commonsense170K. These findings suggest that adapter-based PEFT can improve structured task accuracy compared to advanced prompting strategies.
 
@@ -77,62 +77,13 @@ Based on the cumulative evidence from these studies, the overarching goal of thi
     \item \textbf{H4:} Performance gains achieved via adapter-based PEFT justify the computational and resource cost compared to advanced prompting methods.
 \end{itemize}
 
+\section{Methodology}
 
-\subsection*{Figures and Tables}
+This section outlines the experimental design, dataset, model architecture, training procedures, and evaluation metrics used to compare adapter-based fine-tuning with advanced prompting strategies for structured parsing tasks. This approach builds upon the framework established in our previous work \citep{karlovic2025large}, ensuring direct comparability while introducing new dimensions of analysis. The experiment is structured to rigorously test the formulated hypotheses by systematically evaluating performance, stability, robustness, and cost-effectiveness across both optimization paradigms. The following subsections detail each component of the methodology.
 
-Use the table and tabular commands for basic tables --- see Table~\ref{tab:widgets}, for example. You can upload a figure (JPEG, PNG or PDF) using the project menu. To include it in your document, use the includegraphics command as in the code for Figure~\ref{fig:view} below.
+\section{Acknowledgments}
 
-%begin{figure}[ht]
-%\centering
-%\includegraphics[width=0.7\linewidth]{frog}
-%\caption{An example image of a frog.}
-%\label{fig:view}
-%\end{figure}
-
-\begin{table}[ht]
-\centering
-\begin{tabular}{l|r}
-Item & Quantity \\\hline
-Candles & 4 \\
-Fork handles & ?  
-\end{tabular}
-\caption{\label{tab:widgets}An example table.}
-\end{table}
-
-\subsection*{Citations}
-
-LaTeX formats citations and references automatically using the bibliography records in your .bib file, which you can edit via the project menu. Use the cite command for an inline citation, like \cite{lees2010theoretical}, and the citep command for a citation in parentheses \citep{lees2010theoretical}.
-
-\subsection*{Mathematics}
-
-\LaTeX{} is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
-$$S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i$$
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
-
-\subsection*{Lists}
-
-You can make lists with automatic numbering \dots
-
-\begin{enumerate}[noitemsep] 
-\item Like this,
-\item and like this.
-\end{enumerate}
-\dots or bullet points \dots
-\begin{itemize}[noitemsep] 
-\item Like this,
-\item and like this.
-\end{itemize}
-\dots or with words and descriptions \dots
-\begin{description}
-\item[Word] Definition
-\item[Concept] Explanation
-\item[Idea] Text
-\end{description}
-
-\section*{Acknowledgments}
-
-Additional information can be given in the template, such as to not include funder information in the acknowledgments section.
+This research is (partly) supported by SPIN projects “INFOBIP Konverzacijski Order Management (IP.1.1.03.0120)”, “Projektiranje i razvoj nove generacije laboratorijskog informacijskog sustava (iLIS)” (IP.1.1.03.0158), “Istraživanje i razvoj inovativnog sustava preporuka za napredno gostoprimstvo u turizmu (InnovateStay)” (IP.1.1.03.0039), “EDIH ADRIA – European Digital Innovation Hub Adria 2.0 (project no. 101256325)” and the FIPU project “Sustav za modeliranje i provedbu poslovnih procesa u heterogenom i decentraliziranom računalnom sustavu”.
 
 % \bibliographystyle{plainnat}
 \bibliography{references}
