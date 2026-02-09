@@ -79,12 +79,67 @@ Based on the cumulative evidence from these studies, the overarching goal of thi
 
 \section{Methodology}
 
-This section outlines the experimental design, dataset, model architecture, training procedures, and evaluation metrics used to compare adapter-based fine-tuning with advanced prompting strategies for structured parsing tasks. This approach builds upon the framework established in our previous work \citep{karlovic2025large}, ensuring direct comparability while introducing new dimensions of analysis. The experiment is structured to rigorously test the formulated hypotheses by systematically evaluating performance, stability, robustness, and cost-effectiveness across both optimization paradigms. The following subsections detail each component of the methodology.
+This section details the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL). The primary objective is to determine the performance ceiling, robustness, and structural integrity of various Large Language Models (LLMs) when tasked with converting unstructured natural language into strictly formatted JSON objects. This methodology extends the comparative benchmarks established in \citep{karlovic2025large}, applying them to a specialized domain of structured parsing.
 
-\subsection{Dataset}
-\subsection{Model Architecture and Training Procedures}
-\subsection{Prompting Strategies}
+\subsection{Dataset and Task Definition}
+The experimental task focuses on the "Natural Language to Structured Command" conversion, a critical component in automated inventory and commerce systems. The dataset consists of 10,000 synthetically generated yet linguistically diverse shopping-cart instructions.
+Each instance requires the model to extract or infer three specific attributes:
+
+\begin{enumerate}
+    \item \textbf{Action:} A classification task mapping verbs to a binary set of \{\textit{add, remove}\}.
+    \item \textbf{Product:} A named entity recognition (NER) task to identify the subject item.
+    \item \textbf{Quantity:} A numerical extraction task where the model must default to an integer value of 1 if no quantifier is explicitly mentioned in the prompt.
+\end{enumerate}
+
+The corpus was split into a \textbf{Training Set} of 8,000 examples, utilized for the LoRA adapter training phase, and a \textbf{Test Set} of 2,000 examples. The test set remained unseen by the adapters to ensure unbiased evaluation against the prompting strategies.
+
+\subsection{Model Selection and Inference Environment}
+We selected a heterogeneous suite of models to analyze how architectural scale and specialized training (e.g., reasoning-distilled models) influence parsing performance. The models were deployed via the Ollama framework to ensure local reproducibility and consistent inference parameters (e.g., temperature set to $0$ to minimize stochastic variance).
+
+The model suite is categorized by parameter count and family:
+\begin{itemize}
+    \item \textbf{Large-Scale:} Llama 3.3 (70B).
+    \item \textbf{Mid-Range:} DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), and Granite 3.3 (8B).
+    \item \textbf{Small-Scale (SLMs):} Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), and DeepSeek-R1 (1.5B).
+\end{itemize}
+
+\subsection{Adapter-Based Fine-Tuning (LoRA)}
+For the fine-tuning paradigm, we employed \textbf{Low-Rank Adaptation (LoRA)}. This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
+
+The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. The forward pass for a given input $x$ is represented as:
+\begin{equation}
+    h = W_0 x + \Delta W x = W_0 x + BAx
+\end{equation}
+
+In this study, we targeted all linear modules within the transformer architecture (specifically \texttt{q\_proj}, \texttt{v\_proj}, \texttt{k\_proj}, \texttt{o\_proj}, and \texttt{MLP} layers) to ensure the adapter captured the necessary structural constraints for JSON generation. The specific hyperparameters utilized in this study include:
+\begin{itemize}
+    \item \textbf{Rank ($r$):} [Insert Value]
+    \item \textbf{Alpha ($\alpha$):} [Insert Value]
+    \item \textbf{Target Modules:} All linear layers (comprehensive adaptation).
+    \item \textbf{Precision:} 4-bit (QLoRA) or 16-bit, depending on the hardware constraints at runtime.
+\end{itemize}
+\subsection{Prompt Engineering Strategies}
+To establish a baseline for In-Context Learning (ICL), we implemented three escalating levels of prompt complexity:
+
+\begin{enumerate}
+    \item \textbf{Minimal Instruction (Zero-Shot):} A concise prompt defining the role of the model and the required JSON schema.
+    \item \textbf{Extended Prompt (Instructional Weight):} This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
+    \item \textbf{Few-Shot Prompting:} Building upon the Extended Prompt, this version includes [Insert Number] high-quality examples of natural language inputs and their corresponding JSON outputs, providing a semantic and structural blueprint for the model.
+\end{enumerate}
+
 \subsection{Evaluation Metrics}
+The models are evaluated on two primary dimensions: \textbf{Syntactic Integrity} and \textbf{Semantic Accuracy}.
+
+\subsubsection{JSON Validity Rate}
+Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that fails standard library parsing ($json.loads()$) is categorized as a failure.
+
+\subsubsection{Structured F1 Score}
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields. The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
+\begin{equation}
+    F_1 = 2 \cdot \frac{P \cdot R}{P + R}
+\end{equation}
+
+We report the macro-averaged F1 across all fields to provide a singular measure of parsing performance.
 \section{Results and discussion}
 \section{Conclusion}
 
