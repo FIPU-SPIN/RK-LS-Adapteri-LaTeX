@@ -93,6 +93,59 @@ Each instance requires the model to extract or infer three specific attributes:
 
 The corpus was split into a \textbf{Training Set} of 8,000 examples, utilized for the LoRA adapter training phase, and a \textbf{Test Set} of 2,000 examples. The test set remained unseen by the adapters to ensure unbiased evaluation against the prompting strategies.
 
+\subsection{Adapter Training and Evaluation Data}
+
+To rigorously evaluate the effectiveness of adapter-based fine-tuning, we constructed a controlled dataset specifically tailored for structured command parsing. The corpus comprises \textbf{10,000 annotated natural-language shopping instructions}, each paired with a ground-truth structured representation containing three labeled attributes: \textit{action}, \textit{product}, and \textit{quantity}.
+
+All samples were synthetically generated but linguistically diversified to emulate real-world user interactions in e-commerce environments. Variation was introduced through paraphrasing, synonym substitution, implicit quantity expressions, and differing grammatical constructions to ensure that models could not rely on surface-form memorization alone.
+
+\subsubsection{Training–Validation Split}
+
+From the full corpus, \textbf{8,000 examples} were allocated to the adapter training phase. During fine-tuning, this subset was further divided into:
+
+\begin{itemize}
+    \item \textbf{Training Set:} 8,000 examples used for gradient updates of adapter parameters.
+    \item \textbf{Validation Set:} 2,000 held-out examples used exclusively for intermediate evaluation, hyperparameter monitoring, and early-stopping criteria.
+\end{itemize}
+
+The validation subset enabled continuous assessment of convergence behavior, overfitting risk, and structural output fidelity during adapter optimization.
+
+\subsubsection{Test Set for Generalization Assessment}
+
+To measure true generalization performance, we constructed an additional \textbf{independent test set of 2,000 examples}. These samples were fully disjoint from the adapter training and validation data, containing novel sentence structures, paraphrasing patterns, and lexical combinations not observed during fine-tuning.
+
+This separation ensures that evaluation reflects the adapters’ ability to generalize learned structural mappings rather than memorize training distributions.
+
+\subsubsection{Input Characteristics}
+
+Each input instance represents a free-form shopping command, such as product additions, removals, or quantity adjustments. Linguistic diversity includes:
+
+\begin{itemize}
+    \item Explicit quantities (e.g., “Add 3 apples”)
+    \item Implicit quantities (e.g., “Remove milk” → quantity defaults to 1)
+    \item Multi-word paraphrases (e.g., “Put two bottles of water into the cart”)
+    \item Verb variation (add, insert, delete, remove, take out)
+\end{itemize}
+
+Despite surface variability, all commands map deterministically to a fixed JSON schema, enabling objective evaluation of structural and semantic correctness.
+
+\subsubsection{Annotation Schema}
+
+Ground-truth labels were normalized to enforce schema consistency:
+
+\begin{itemize}
+    \item \textbf{Action:} Binary label \{\textit{add, remove}\}
+    \item \textbf{Product:} Canonical single-entity product name
+    \item \textbf{Quantity:} Integer value with a default fallback of 1
+\end{itemize}
+
+This normalization ensures that evaluation metrics reflect parsing capability rather than lexical formatting differences.
+
+\subsubsection{Rationale for Dataset Scale}
+
+The selected dataset size balances computational feasibility with sufficient diversity for adapter specialization. Prior PEFT studies indicate that adapter modules can achieve strong task alignment with relatively modest data volumes, provided the schema is well-defined and supervision signals are consistent. The 8k/2k/2k split therefore provides adequate capacity for training, validation monitoring, and unbiased performance benchmarking.
+
+
 \subsection{Model Selection and Inference Environment}
 We selected a heterogeneous suite of models to analyze how architectural scale and specialized training (e.g., reasoning-distilled models) influence parsing performance. The models were deployed via the Ollama framework to ensure local reproducibility and consistent inference parameters (e.g., temperature set to $0$ to minimize stochastic variance).
 
