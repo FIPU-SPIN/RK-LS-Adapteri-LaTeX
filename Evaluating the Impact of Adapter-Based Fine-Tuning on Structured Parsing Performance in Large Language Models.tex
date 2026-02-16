@@ -176,7 +176,7 @@ To establish a baseline for In-Context Learning (ICL), we implemented three esca
 
 \begin{enumerate}
     \item \textbf{Minimal Instruction (Zero-Shot):} A concise prompt defining the role of the model and the required JSON schema.
-    \item \textbf{Extended Prompt (Instructional Weight):} This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
+    \item \textbf{Extended Prompt:} This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
     \item \textbf{Few-Shot Prompting:} Building upon the Extended Prompt, this version includes [Insert Number] high-quality examples of natural language inputs and their corresponding JSON outputs, providing a semantic and structural blueprint for the model.
 \end{enumerate}
 
@@ -187,7 +187,7 @@ The models are evaluated on two primary dimensions: \textbf{Syntactic Integrity}
 Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that fails standard library parsing ($json.loads()$) is categorized as a failure.
 
 \subsubsection{Structured F1 Score}
-For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields. The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields. The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$) \citep{wang2024adaptable} :
 \begin{equation}
     F_1 = 2 \cdot \frac{P \cdot R}{P + R}
 \end{equation}
