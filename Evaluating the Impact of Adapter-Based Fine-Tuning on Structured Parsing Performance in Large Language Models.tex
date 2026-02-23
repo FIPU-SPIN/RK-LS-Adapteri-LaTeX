@@ -79,82 +79,116 @@ Based on the cumulative evidence from these studies, the overarching goal of thi
 
 \section{Methodology}
 
-This section details the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL). The primary objective is to determine the performance ceiling, robustness, and structural integrity of various Large Language Models (LLMs) when tasked with converting unstructured natural language into strictly formatted JSON objects. This methodology extends the comparative benchmarks established in \citep{karlovic2025large}, applying them to a specialized domain of structured parsing.
+This section describes the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL) for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of large language models (LLMs) when converting unstructured natural language instructions into strictly formatted JSON objects. The methodology extends the comparative benchmarking approach of \citep{karlovic2025large} to a controlled structured parsing domain.
 
-\subsection{Dataset and Task Definition}
-The experimental task focuses on the "Natural Language to Structured Command" conversion, a critical component in automated inventory and commerce systems. The dataset consists of 10,000 synthetically generated yet linguistically diverse shopping-cart instructions.
-Each instance requires the model to extract or infer three specific attributes:
+\subsection{Task Definition}
+
+The experimental task focuses on \textit{Natural Language to Structured Command} conversion, a core component of automated commerce and inventory systems. Given a free-form shopping instruction, the model must output a valid JSON object with the following schema:
+
+\begin{verbatim}
+{
+  "action": "...",
+  "quantity": "...",
+  "product": "..."
+}
+\end{verbatim}
+
+Each instance requires extraction or inference of three attributes:
 
 \begin{enumerate}
-    \item \textbf{Action:} A classification task mapping verbs to a binary set of \{\textit{add, remove}\}.
-    \item \textbf{Product:} A named entity recognition (NER) task to identify the subject item.
-    \item \textbf{Quantity:} A numerical extraction task where the model must default to an integer value of 1 if no quantifier is explicitly mentioned in the prompt.
+    \item \textbf{Action:} Binary classification over \{\textit{add, remove}\}.
+    \item \textbf{Product:} Named entity extraction identifying the canonical product name.
+    \item \textbf{Quantity:} Integer extraction with a default value of 1 when no explicit quantity is provided.
 \end{enumerate}
 
-The corpus was split into a \textbf{Training Set} of 8,000 examples, utilized for the LoRA adapter training phase, and a \textbf{Test Set} of 2,000 examples. The test set remained unseen by the adapters to ensure unbiased evaluation against the prompting strategies.
+The mapping from natural language to JSON is deterministic, enabling objective evaluation of both semantic correctness and structural integrity.
 
-\subsection{Adapter Training and Evaluation Data}
+\subsection{Dataset Construction}
 
-To rigorously evaluate the effectiveness of adapter-based fine-tuning, we constructed a controlled dataset specifically tailored for structured command parsing. The corpus comprises \textbf{10,000 annotated natural-language shopping instructions}, each paired with a ground-truth structured representation containing three labeled attributes: \textit{action}, \textit{product}, and \textit{quantity}.
+The dataset consists of \textbf{12,000 synthetically generated but linguistically diverse shopping instructions}, created in collaboration with industry partners to reflect realistic user interaction patterns.
 
-All samples were synthetically generated but linguistically diversified to emulate real-world user interactions in e-commerce environments. Variation was introduced through paraphrasing, synonym substitution, implicit quantity expressions, and differing grammatical constructions to ensure that models could not rely on surface-form memorization alone.
-
-\subsubsection{Training–Validation Split}
-
-From the full corpus, \textbf{8,000 examples} were allocated to the adapter training phase. During fine-tuning, this subset was further divided into:
+Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization. Diversity mechanisms include:
 
 \begin{itemize}
-    \item \textbf{Training Set:} 8,000 examples used for gradient updates of adapter parameters.
-    \item \textbf{Validation Set:} 2,000 held-out examples used exclusively for intermediate evaluation, hyperparameter monitoring, and early-stopping criteria.
+    \item Verb paraphrasing (e.g., add, insert, remove, delete, take out)
+    \item Explicit and implicit quantity expressions
+    \item Variable grammatical constructions
+    \item Multi-word paraphrases and lexical substitutions
 \end{itemize}
 
-The validation subset enabled continuous assessment of convergence behavior, overfitting risk, and structural output fidelity during adapter optimization.
+Each example is paired with a normalized ground-truth JSON annotation containing the three labeled attributes.
 
-\subsubsection{Test Set for Generalization Assessment}
+\subsection{Data Splits}
 
-To measure true generalization performance, we constructed an additional \textbf{independent test set of 2,000 examples}. These samples were fully disjoint from the adapter training and validation data, containing novel sentence structures, paraphrasing patterns, and lexical combinations not observed during fine-tuning.
-
-This separation ensures that evaluation reflects the adapters’ ability to generalize learned structural mappings rather than memorize training distributions.
-
-\subsubsection{Input Characteristics}
-
-Each input instance represents a free-form shopping command, such as product additions, removals, or quantity adjustments. Linguistic diversity includes:
+The corpus is partitioned as follows:
 
 \begin{itemize}
-    \item Explicit quantities (e.g., “Add 3 apples”)
-    \item Implicit quantities (e.g., “Remove milk” → quantity defaults to 1)
-    \item Multi-word paraphrases (e.g., “Put two bottles of water into the cart”)
-    \item Verb variation (add, insert, delete, remove, take out)
+    \item \textbf{Training Set:} 8,000 examples used for adapter parameter optimization.
+    \item \textbf{Validation Set:} 2,000 examples used for monitoring convergence and preventing overfitting.
+    \item \textbf{Test Set:} 2,000 disjoint examples reserved exclusively for final evaluation.
 \end{itemize}
 
-Despite surface variability, all commands map deterministically to a fixed JSON schema, enabling objective evaluation of structural and semantic correctness.
+The test set remains completely unseen during adapter training and validation. It contains novel paraphrasing patterns and lexical combinations to assess generalization beyond the training distribution.
 
-\subsubsection{Annotation Schema}
+\subsection{Model Selection}
 
-Ground-truth labels were normalized to enforce schema consistency:
+To analyze the effect of model scale and architectural variation, we evaluate a heterogeneous suite of LLMs across parameter sizes and training paradigms. Models are grouped into three categories:
 
 \begin{itemize}
-    \item \textbf{Action:} Binary label \{\textit{add, remove}\}
-    \item \textbf{Product:} Canonical single-entity product name
-    \item \textbf{Quantity:} Integer value with a default fallback of 1
+    \item \textbf{Large-Scale:} Llama 3.3 (70B)
+    \item \textbf{Mid-Range:} DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), Granite 3.3 (8B)
+    \item \textbf{Small-Scale (SLMs):} Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), DeepSeek-R1 (1.5B)
 \end{itemize}
 
-This normalization ensures that evaluation metrics reflect parsing capability rather than lexical formatting differences.
+All models are evaluated under identical inference conditions with temperature set to 0 to eliminate stochastic variance.
 
-\subsubsection{Rationale for Dataset Scale}
+\subsection{Parameter-Efficient Fine-Tuning}
 
-The selected dataset size balances computational feasibility with sufficient diversity for adapter specialization. Prior PEFT studies indicate that adapter modules can achieve strong task alignment with relatively modest data volumes, provided the schema is well-defined and supervision signals are consistent. The 8k/2k/2k split therefore provides adequate capacity for training, validation monitoring, and unbiased performance benchmarking.
+For each base model, we compare three configurations:
 
+\begin{enumerate}
+    \item \textbf{Base Model (Prompting Only):} No parameter updates; task performed via structured prompt engineering.
+    \item \textbf{LoRA Adapter:} Low-Rank Adaptation modules trained on the 8,000-example training set.
+    \item \textbf{IA$^3$ Adapter:} Infused Adapter by Inhibiting and Amplifying Inner Activations trained under identical conditions.
+\end{enumerate}
 
-\subsection{Model Selection and Inference Environment}
-We selected a heterogeneous suite of models to analyze how architectural scale and specialized training (e.g., reasoning-distilled models) influence parsing performance. The models were deployed via the Ollama framework to ensure local reproducibility and consistent inference parameters (e.g., temperature set to $0$ to minimize stochastic variance).
+Adapters are implemented using the PEFT framework within the Hugging Face Transformers ecosystem. Hyperparameters, tokenizer configuration, and preprocessing steps are held constant across experiments to ensure fair comparison. No hyperparameter search is performed.
 
-The model suite is categorized by parameter count and family:
+Training is conducted using multi-GPU Distributed Data Parallel (DDP).
+
+QLoRA is not employed in this study.
+
+\subsection{Evaluation Protocol}
+
+All configurations are evaluated on the same held-out test set of 2,000 examples.
+
+A prediction is considered correct only if:
+
 \begin{itemize}
-    \item \textbf{Large-Scale:} Llama 3.3 (70B).
-    \item \textbf{Mid-Range:} DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), and Granite 3.3 (8B).
-    \item \textbf{Small-Scale (SLMs):} Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), and DeepSeek-R1 (1.5B).
+    \item All three fields (\textit{action}, \textit{quantity}, \textit{product}) exactly match the ground truth.
+    \item The output is valid JSON and can be successfully parsed.
 \end{itemize}
+
+If the model fails to produce valid JSON, the prediction is counted as incorrect.
+
+Performance is measured using Precision, Recall, and F1 Score under strict exact-match criteria. F1 Score serves as the primary comparison metric.
+
+\subsection{Comparative Analysis}
+
+For each model, we report results in the following format:
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Model & Base (Prompt) & LoRA & IA$^3$ \\
+\hline
+... & ... & ... & ... \\
+\hline
+\end{tabular}
+\end{center}
+
+This structure enables direct comparison between prompt-based inference and adapter-based specialization across model scales.
+
 
 \subsection{Adapter-Based Fine-Tuning (LoRA)}
 For the fine-tuning paradigm, we employed \textbf{Low-Rank Adaptation (LoRA)}. This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
