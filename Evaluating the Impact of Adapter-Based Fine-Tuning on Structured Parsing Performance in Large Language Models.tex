@@ -203,18 +203,24 @@ This structure enables direct comparison between prompt-based inference and adap
 \subsection{Adapter-Based Fine-Tuning (LoRA)}
 For the fine-tuning paradigm, we employed \textbf{Low-Rank Adaptation (LoRA)}. This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
 
-The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. The forward pass for a given input $x$ is represented as:
+The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
+
 \begin{equation}
-    h = W_0 x + \Delta W x = W_0 x + BAx
+    h = W_0 x + \left(\frac{\alpha}{r}\right) \Delta W x = W_0 x + \left(\frac{\alpha}{r}\right) BAx
 \end{equation}
 
-In this study, we targeted all linear modules within the transformer architecture (specifically \texttt{q\_proj}, \texttt{v\_proj}, \texttt{k\_proj}, \texttt{o\_proj}, and \texttt{MLP} layers) to ensure the adapter captured the necessary structural constraints for JSON generation. The specific hyperparameters utilized in this study include:
+In this study, we targeted all linear modules within the transformer architecture to ensure the adapter captured the necessary structural and semantic constraints for JSON generation. Specifically, the adaptation was applied comprehensively to both the attention mechanisms (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj}, \texttt{o\_proj}) and the feed-forward network layers (\texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}). The specific LoRA configuration utilized during fine-tuning included:
+
 \begin{itemize}
-    \item \textbf{Rank ($r$):} [Insert Value]
-    \item \textbf{Alpha ($\alpha$):} [Insert Value]
-    \item \textbf{Target Modules:} All linear layers (comprehensive adaptation).
-    \item \textbf{Precision:} 4-bit (QLoRA) or 16-bit, depending on the hardware constraints at runtime.
+    \item \textbf{Rank ($r$):} $32$. A higher rank was selected to provide sufficient parameter capacity for the complex semantic mapping required in structured parsing tasks.
+    \item \textbf{Alpha ($\alpha$):} $64$. The scaling factor was strictly set to $\alpha = 2r$, a heuristic demonstrated to stabilize training and improve convergence when utilizing higher ranks.
+    \item \textbf{Dropout:} $0.05$, applied to the adapter layers as a regularization measure to prevent overfitting.
+    \item \textbf{Precision and Compute:} Models were trained without 4-bit quantization, instead utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations natively supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
 \end{itemize}
+
+\subsubsection{Optimization and Training Dynamics}
+The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps.
+
 \subsection{Prompt Engineering Strategies}
 To establish a baseline for In-Context Learning (ICL), we implemented three escalating levels of prompt complexity:
 
