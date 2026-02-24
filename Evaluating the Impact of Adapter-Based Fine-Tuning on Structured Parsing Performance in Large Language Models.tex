@@ -238,7 +238,7 @@ The models were evaluated on two primary dimensions to assess both syntactic int
 Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination.
 
 \subsubsection{Structured F1 Score}
-For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$) \citep{wang2024adaptable}:
 
 \begin{equation}
     F_1 = 2 \cdot \frac{P \cdot R}{P + R}
