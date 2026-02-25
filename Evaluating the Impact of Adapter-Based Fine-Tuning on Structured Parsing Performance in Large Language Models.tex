@@ -71,10 +71,10 @@ Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting
 Based on the cumulative evidence from these studies, the overarching goal of this work is to investigate how adapter-based parameter-efficient fine-tuning (PEFT) compares to advanced prompting in terms of structured task accuracy, output stability, robustness, and cost-effectiveness. Accordingly, the following research hypotheses are formulated:
 
 \begin{itemize}
-    \item \textbf{H1:} Adapter-based PEFT improves structured task performance relative to advanced prompting.
-    \item \textbf{H2:} Adapter fine-tuning reduces output variability compared to prompting approaches.
-    \item \textbf{H3:} Adapter fine-tuning enhances robustness to input noise, adversarial perturbations, and paraphrasing relative to prompting.
-    \item \textbf{H4:} Performance gains achieved via adapter-based PEFT justify the computational and resource cost compared to advanced prompting methods.
+    \item H1: Adapter-based PEFT improves structured task performance relative to advanced prompting.
+    \item H2: Adapter fine-tuning reduces output variability compared to prompting approaches.
+    \item H3: Adapter fine-tuning enhances robustness to input noise, adversarial perturbations, and paraphrasing relative to prompting.
+    \item H4: Performance gains achieved via adapter-based PEFT justify the computational and resource cost compared to advanced prompting methods.
 \end{itemize}
 
 \section{Methodology}
@@ -83,7 +83,7 @@ This section describes the experimental framework designed to evaluate the trade
 
 \subsection{Task Definition}
 
-The experimental task focuses on \textit{Natural Language to Structured Command} conversion, a core component of automated commerce and inventory systems. Given a free-form shopping instruction, the model must output a valid JSON object with the following schema:
+The experimental task focuses on Natural Language to Structured Command conversion, a core component of automated commerce and inventory systems. Given a free-form shopping instruction, the model must output a valid JSON object with the following schema:
 
 \begin{verbatim}
 {
@@ -99,16 +99,16 @@ The experimental task focuses on the "Natural Language to Structured Command" co
 
 Each instance requires the model to extract or infer three specific attributes and map them deterministically to a fixed JSON schema:
 \begin{enumerate}
-    \item \textbf{Action:} Binary classification over \{\textit{add, remove}\}.
-    \item \textbf{Product:} Named entity extraction identifying the canonical product name.
-    \item \textbf{Quantity:} Integer extraction with a default value of 1 when no explicit quantity is provided.
+    \item Action: Binary classification over \{add, remove\}.
+    \item Product: Named entity extraction identifying the canonical product name.
+    \item Quantity: Integer extraction with a default value of 1 when no explicit quantity is provided.
 \end{enumerate}
 
 The mapping from natural language to JSON is deterministic, enabling objective evaluation of both semantic correctness and structural integrity.
 
 \subsection{Dataset Construction}
 
-The dataset consists of \textbf{12,000 synthetically generated but linguistically diverse shopping instructions}, created in collaboration with industry partners to reflect realistic user interaction patterns.
+The dataset consists of 12,000 synthetically generated but linguistically diverse shopping instructions, created in collaboration with industry partners to reflect realistic user interaction patterns.
 
 Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization. Diversity mechanisms include:
 
@@ -124,18 +124,15 @@ To balance computational feasibility with sufficient diversity for adapter speci
 Each example is paired with a normalized ground-truth JSON annotation containing the three labeled attributes.
 
 \subsection{Data Splits}
-
+%DODATI PAR RECENINCA
 The corpus is partitioned as follows:
 
-\begin{equation}
-    h = W_0 x + \left(\frac{\alpha}{r}\right)BAx
-\end{equation}
 
 Based on empirical evidence identifying optimal configurations for LLaMA-based architectures, we targeted all linear modules within the transformer architecture (specifically $W_q, W_k, W_v, W_o$, and MLP layers) to ensure the adapter captured the necessary structural constraints for JSON generation. The specific hyperparameters utilized include:
 \begin{itemize}
-    \item \textbf{Training Set:} 8,000 examples used for adapter parameter optimization.
-    \item \textbf{Validation Set:} 2,000 examples used for monitoring convergence and preventing overfitting.
-    \item \textbf{Test Set:} 2,000 disjoint examples reserved exclusively for final evaluation.
+    \item Training Set: 8,000 examples used for adapter parameter optimization.
+    \item Validation Set: 2,000 examples used for monitoring convergence and preventing overfitting.
+    \item Test Set: 2,000 disjoint examples reserved exclusively for final evaluation.
 \end{itemize}
 
 The test set remains completely unseen during adapter training and validation. It contains novel paraphrasing patterns and lexical combinations to assess generalization beyond the training distribution.
@@ -145,9 +142,9 @@ The test set remains completely unseen during adapter training and validation. I
 To analyze the effect of model scale and architectural variation, we evaluate a heterogeneous suite of LLMs across parameter sizes and training paradigms. Models are grouped into three categories:
 
 \begin{itemize}
-    \item \textbf{Large-Scale:} Llama 3.3 (70B)
-    \item \textbf{Mid-Range:} DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), Granite 3.3 (8B)
-    \item \textbf{Small-Scale (SLMs):} Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), DeepSeek-R1 (1.5B)
+    \item Large-Scale: Llama 3.3 (70B)
+    \item Mid-Range: DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), Granite 3.3 (8B)
+    \item Small-Scale (SLMs): Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), DeepSeek-R1 (1.5B)
 \end{itemize}
 
 All models are evaluated under identical inference conditions with temperature set to 0 to eliminate stochastic variance.
@@ -157,9 +154,9 @@ All models are evaluated under identical inference conditions with temperature s
 For each base model, we compare three configurations:
 
 \begin{enumerate}
-    \item \textbf{Base Model (Prompting Only):} No parameter updates; task performed via structured prompt engineering.
-    \item \textbf{LoRA Adapter:} Low-Rank Adaptation modules trained on the 8,000-example training set.
-    \item \textbf{IA$^3$ Adapter:} Infused Adapter by Inhibiting and Amplifying Inner Activations trained under identical conditions.
+    \item Base Model (Prompting Only): No parameter updates; task performed via structured prompt engineering.
+    \item LoRA Adapter: Low-Rank Adaptation modules trained on the 8,000-example training set.
+    \item IA$^3$ Adapter: Infused Adapter by Inhibiting and Amplifying Inner Activations trained under identical conditions.
 \end{enumerate}
 
 Adapters are implemented using the PEFT framework within the Hugging Face Transformers ecosystem. Hyperparameters, tokenizer configuration, and preprocessing steps are held constant across experiments to ensure fair comparison. No hyperparameter search is performed.
@@ -175,7 +172,7 @@ All configurations are evaluated on the same held-out test set of 2,000 examples
 A prediction is considered correct only if:
 
 \begin{itemize}
-    \item All three fields (\textit{action}, \textit{quantity}, \textit{product}) exactly match the ground truth.
+    \item All three fields (action, quantity, product) exactly match the ground truth.
     \item The output is valid JSON and can be successfully parsed.
 \end{itemize}
 
@@ -201,7 +198,7 @@ This structure enables direct comparison between prompt-based inference and adap
 
 
 \subsection{Adapter-Based Fine-Tuning (LoRA)}
-For the fine-tuning paradigm, we employed \textbf{Low-Rank Adaptation (LoRA)}. This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
+For the fine-tuning paradigm, we employed Low-Rank Adaptation (LoRA). This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
 
 The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
 
@@ -212,10 +209,10 @@ The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{
 In this study, we targeted all linear modules within the transformer architecture to ensure the adapter captured the necessary structural and semantic constraints for JSON generation. Specifically, the adaptation was applied comprehensively to both the attention mechanisms (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj}, \texttt{o\_proj}) and the feed-forward network layers (\texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}). The specific LoRA configuration utilized during fine-tuning included:
 
 \begin{itemize}
-    \item \textbf{Rank ($r$):} $32$. A higher rank was selected to provide sufficient parameter capacity for the complex semantic mapping required in structured parsing tasks.
-    \item \textbf{Alpha ($\alpha$):} $64$. The scaling factor was strictly set to $\alpha = 2r$, a heuristic demonstrated to stabilize training and improve convergence when utilizing higher ranks.
-    \item \textbf{Dropout:} $0.05$, applied to the adapter layers as a regularization measure to prevent overfitting.
-    \item \textbf{Precision and Compute:} Models were trained without 4-bit quantization, instead utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations natively supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
+    \item Rank ($r$): $32$. A higher rank was selected to provide sufficient parameter capacity for the complex semantic mapping required in structured parsing tasks.
+    \item Alpha ($\alpha$): $64$. The scaling factor was strictly set to $\alpha = 2r$, a heuristic demonstrated to stabilize training and improve convergence when utilizing higher ranks.
+    \item Dropout: $0.05$, applied to the adapter layers as a regularization measure to prevent overfitting.
+    \item Precision and Compute: Models were trained without 4-bit quantization, instead utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations natively supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
 \end{itemize}
 
 \subsubsection{Optimization and Training Dynamics}
@@ -225,9 +222,9 @@ The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum
 To establish a baseline for In-Context Learning (ICL), we implemented three escalating levels of prompt complexity:
 
 \begin{enumerate}
-    \item \textbf{Minimal Instruction (Zero-Shot):} A concise prompt defining the role of the model and the required JSON schema.
-    \item \textbf{Extended Prompt:} This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
-    \item \textbf{Few-Shot Prompting:} Building upon the Extended Prompt, this version includes [Insert Number] high-quality examples of natural language inputs and their corresponding JSON outputs, providing a semantic and structural blueprint for the model.
+    \item Minimal Instruction (Zero-Shot): A concise prompt defining the role of the model and the required JSON schema.
+    \item Extended Prompt: This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
+    \item Few-Shot Prompting: Building upon the Extended Prompt, this version includes [Insert Number] high-quality examples of natural language inputs and their corresponding JSON outputs, providing a semantic and structural blueprint for the model.
 \end{enumerate}
 
 \subsection{Evaluation Metrics}
@@ -238,7 +235,262 @@ The models were evaluated on two primary dimensions to assess both syntactic int
 Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination.
 
 \subsubsection{Structured F1 Score}
-For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$) \citep{wang2024adaptable}:
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
+
+\begin{equation}
+    F_1 = 2 \cdot \frac{P \cdot R}{P + R}
+\end{equation}
+
+We report the macro-averaged F1 across all fields to provide a singular, robust measure of parsing performance.
+
+\section{Results and discussion}
+\section{Conclusion}
+
+
+\section{Acknowledgments}
+
+This work was (partially) supported by the EC Digital Europe Programme EDIH Adria 2.0 (101256325); SPIN projects IP.1.1.03.0120, IP.1.1.03.0028 and IP.1.1.03.0039; and NextGenerationEU University grants: uniri-iz-25-6, uniri-iz-25-220, IIP\_010144, IIP\_010136, and UNIN-TEH-25-1-8.
+
+% \bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}\documentclass[fleqn,10pt]{olplainarticle}
+% Use option lineno for line numbers 
+
+\title{ Evaluating the Impact of Adapter-Based Fine-Tuning on Structured Parsing Performance in Large Language Models}
+
+\author[1]{Ratomir Karlović}
+\author[2]{Luka Sever}
+\affil[1]{Address of first author}
+\affil[2]{Address of second author}
+
+\keywords{LLM, Adapters, PEFT}
+
+\begin{document}
+
+\begin{abstract}
+Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods,such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
+This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy, consistency, and robustness.
+The experiment uses the same controlled shopping-cart parsing task and dataset of 1000 synthetic commands to ensure direct comparability. Results will quantify the trade-off between computational cost and performance gains, offering evidence-based insights into whether fine-tuning is a justified investment compared to advanced prompt engineering.
+The expected contribution is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.
+
+\end{abstract}
+
+\flushbottom
+\maketitle
+\thispagestyle{empty}
+
+\section{Introduction}
+
+The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
+A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
+To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using the LLaMA-3-8B model. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA and its quantized variant (QLoRA) to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
+The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking LLaMA-3 on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
+
+
+\section{Background and Related Works}
+
+The rapid growth of large language models (LLMs) has necessitated strategies for adapting them efficiently to downstream tasks. Zhiqiang Hu et al. \citep{hu2023llm} introduced LLM-Adapters, a framework for parameter-efficient fine-tuning (PEFT) that integrates Series adapters, Parallel adapters, Prefix-Tuning, and LoRA. Their study demonstrated that smaller LLaMA models (7B and 13B) equipped with optimized adapters could match or surpass the performance of much larger models such as ChatGPT and GPT-3.5, particularly on structured reasoning tasks using datasets like Math10K and Commonsense170K. These findings suggest that adapter-based PEFT can improve structured task accuracy compared to advanced prompting strategies.
+
+Ding et al. \citep{ding2023parameter} proposed a unified framework called delta-tuning, which adjusts only a small fraction of model parameters. Through extensive evaluation on over 100 NLP tasks, they found that delta-tuning achieved performance comparable to full fine-tuning while significantly reducing GPU memory usage and accelerating backpropagation. Larger models not only benefited more from minimal parameter updates but also converged faster, reinforcing the potential of adapter-based methods to enhance task-specific performance efficiently.
+
+Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and IA3. Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
+
+Razuvayevskaya et al. \citep{razuvayevskaya2024comparison} compared parameter-efficient techniques and full fine-tuning for multilingual news classification. Using XLM-RoBERTa Large, they showed that LoRA and bottleneck adapters could reduce trainable parameters by 140–280 times while maintaining competitive accuracy. Their results suggested that PEFT strategies can outperform traditional prompting approaches, especially when sufficient source data is available.
+
+Shin et al. \citep{shin2025prompt} assessed the trade-offs between prompt engineering and fine-tuning for automated code tasks. Their evaluation of GPT-4 against seventeen fine-tuned baselines revealed that while task-specific prompting sometimes outperformed automated methods in code summarization, fine-tuned models were generally superior in code generation. Human-in-the-loop conversational prompting further enhanced outcomes, demonstrating that adapter-based fine-tuning can stabilize and improve output quality over prompting alone.
+
+Ming Gong et al. \citep{gong2025structure} developed structure-learnable adapters, which introduced differentiable gating and sparsity control to dynamically optimize adapter placement and activation paths. Experiments on the Multi-Task NLU Benchmark indicated that this approach not only achieved high accuracy with minimal parameters but also reduced output variability and maintained robustness under noisy conditions, supporting the notion that adapter fine-tuning can yield more consistent outputs than prompting.
+
+Fang and Ye \citep{fangtowards} proposed RFedLR, a robust PEFT framework for federated learning. By selectively updating noise-sensitive parameters and dynamically weighting client updates, RFedLR achieved up to 10.15\% accuracy improvements over state-of-the-art baselines under high-noise conditions while using only 0.1754\% of the trainable parameters. These results reinforce that adapter-based fine-tuning provides more stable and reliable outputs than prompt-based methods, even in decentralized and noisy environments.
+
+Shuo Chen et al. \citep{chen2023benchmarking} benchmarked eleven adaptation methods on vision-language models under textual and visual corruptions. They found that parameter-efficient adapters exhibited higher resilience to input perturbations than full fine-tuning or prompting, although no single method dominated across all datasets. Increasing adaptation data or parameter size did not guarantee robustness, highlighting the importance of careful PEFT design to enhance model stability.
+
+Chen et al. \citep{chen2025evaluation} evaluated prompt engineering for industrial document processing tasks and found that few-shot learning improved reasoning capabilities over zero-shot prompts. However, adapter-based PEFT consistently offered more reliable and less variable outputs, particularly in complex scenarios with noisy OCR inputs.
+
+Kaijie Zhu et al. \citep{zhu2023promptrobust} introduced PromptRobust, a benchmark for adversarial prompt evaluation across multiple LLMs. Their results showed that word-level adversarial prompts caused a 39\% average performance drop, and few-shot prompts exhibited better robustness than zero-shot prompting. The study illustrates that adapter fine-tuning can improve resilience to prompt-based perturbations.
+
+Jaehyung Kim et al. \citep{kim2023roast} presented ROAST, combining adversarial perturbations with selective training to improve robustness across sentiment classification and entailment tasks. ROAST yielded average improvements of 18.39\% and 7.63\% over state-of-the-art baselines, demonstrating that adapter fine-tuning can mitigate input noise effects more effectively than prompting.
+
+Pei et al. \citep{pei2025selfprompt} proposed SelfPrompt, which autonomously evaluates LLM robustness using domain-constrained knowledge graphs and adversarial prompt generation. Their findings indicated that domain-specific adapter fine-tuning enhances robustness in specialized fields like medicine and biology, outperforming prompting strategies alone.
+
+Lin Mu et al. \citep{mu2025robustness} introduced Robustness of Prompting (RoP), a parameter-free method for improving LLM resilience through error correction and guidance prompts. While effective, experiments confirmed that adapter fine-tuning provides superior stability and transferability across architectures, emphasizing the practical value of PEFT in noisy real-world environments.
+
+Sajjadi Mohammadabadi et al. \citep{sajjadi2025survey} surveyed LLM architectures and adaptation methods, emphasizing the efficiency of PEFT, instruction tuning, and RLHF. They noted that adapter-based fine-tuning can deliver significant performance gains relative to prompting, justifying its computational cost in applied settings.
+
+Trad and Chehab \citep{trad2024prompt} studied phishing detection LLMs and found that while refined prompting improved performance, fine-tuned models achieved higher F1-scores and superior reliability, demonstrating that the cost of PEFT is justified when high precision is required.
+
+Pornprasit and Tantithamthavorn \citep{pornprasit2024fine} evaluated LLM-based code review, showing that fine-tuning GPT-3.5 achieved 73–74\% higher Exact Match rates than prompting approaches. Their study confirmed that adapter-based fine-tuning can deliver meaningful gains even with modest training data.
+
+Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting adaptation outcomes with minimal trials. Their results indicated that fine-tuning consistently outperformed in-context learning in medium to high-cost scenarios, supporting the view that adapter PEFT justifies its resource investment by providing predictable and superior performance.
+
+Based on the cumulative evidence from these studies, the overarching goal of this work is to investigate how adapter-based parameter-efficient fine-tuning (PEFT) compares to advanced prompting in terms of structured task accuracy, output stability, robustness, and cost-effectiveness. Accordingly, the following research hypotheses are formulated:
+
+\begin{itemize}
+    \item H1: Adapter-based PEFT improves structured task performance relative to advanced prompting.
+    \item H2: Adapter fine-tuning reduces output variability compared to prompting approaches.
+    \item H3: Adapter fine-tuning enhances robustness to input noise, adversarial perturbations, and paraphrasing relative to prompting.
+    \item H4: Performance gains achieved via adapter-based PEFT justify the computational and resource cost compared to advanced prompting methods.
+\end{itemize}
+
+\section{Methodology}
+
+This section describes the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL) for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of large language models (LLMs) when converting unstructured natural language instructions into strictly formatted JSON objects. The methodology extends the comparative benchmarking approach of \citep{karlovic2025large} to a controlled structured parsing domain.
+
+\subsection{Task Definition}
+
+The experimental task focuses on Natural Language to Structured Command conversion, a core component of automated commerce and inventory systems. Given a free-form shopping instruction, the model must output a valid JSON object with the following schema:
+
+\begin{verbatim}
+{
+  "action": "...",
+  "quantity": "...",
+  "product": "..."
+}
+\end{verbatim}
+
+Each instance requires extraction or inference of three attributes:
+
+The experimental task focuses on the "Natural Language to Structured Command" conversion, a critical component in automated inventory and e-commerce systems. To rigorously evaluate the effectiveness of both prompting and adapter-based fine-tuning, we constructed a controlled dataset comprising 10,000 annotated natural-language shopping instructions. To ensure high-quality and diverse data, samples were synthetically generated using a teacher-model paradigm.
+
+Each instance requires the model to extract or infer three specific attributes and map them deterministically to a fixed JSON schema:
+\begin{enumerate}
+    \item Action: Binary classification over \{add, remove\}.
+    \item Product: Named entity extraction identifying the canonical product name.
+    \item Quantity: Integer extraction with a default value of 1 when no explicit quantity is provided.
+\end{enumerate}
+
+The mapping from natural language to JSON is deterministic, enabling objective evaluation of both semantic correctness and structural integrity.
+
+\subsection{Dataset Construction}
+
+The dataset consists of 12,000 synthetically generated but linguistically diverse shopping instructions, created in collaboration with industry partners to reflect realistic user interaction patterns.
+
+Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization. Diversity mechanisms include:
+
+\subsubsection{Dataset Splitting for Generalization Assessment}
+To balance computational feasibility with sufficient diversity for adapter specialization, the 10,000 examples were partitioned into three disjoint subsets:
+\begin{itemize}
+    \item Verb paraphrasing (e.g., add, insert, remove, delete, take out)
+    \item Explicit and implicit quantity expressions
+    \item Variable grammatical constructions
+    \item Multi-word paraphrases and lexical substitutions
+\end{itemize}
+
+Each example is paired with a normalized ground-truth JSON annotation containing the three labeled attributes.
+
+\subsection{Data Splits}
+#DODAT PAR RECENINCA
+The corpus is partitioned as follows:
+
+
+Based on empirical evidence identifying optimal configurations for LLaMA-based architectures, we targeted all linear modules within the transformer architecture (specifically $W_q, W_k, W_v, W_o$, and MLP layers) to ensure the adapter captured the necessary structural constraints for JSON generation. The specific hyperparameters utilized include:
+\begin{itemize}
+    \item Training Set: 8,000 examples used for adapter parameter optimization.
+    \item Validation Set: 2,000 examples used for monitoring convergence and preventing overfitting.
+    \item Test Set: 2,000 disjoint examples reserved exclusively for final evaluation.
+\end{itemize}
+
+The test set remains completely unseen during adapter training and validation. It contains novel paraphrasing patterns and lexical combinations to assess generalization beyond the training distribution.
+
+\subsection{Model Selection}
+
+To analyze the effect of model scale and architectural variation, we evaluate a heterogeneous suite of LLMs across parameter sizes and training paradigms. Models are grouped into three categories:
+
+\begin{itemize}
+    \item Large-Scale: Llama 3.3 (70B)
+    \item Mid-Range: DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), Granite 3.3 (8B)
+    \item Small-Scale (SLMs): Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), DeepSeek-R1 (1.5B)
+\end{itemize}
+
+All models are evaluated under identical inference conditions with temperature set to 0 to eliminate stochastic variance.
+
+\subsection{Parameter-Efficient Fine-Tuning}
+
+For each base model, we compare three configurations:
+
+\begin{enumerate}
+    \item Base Model (Prompting Only): No parameter updates; task performed via structured prompt engineering.
+    \item LoRA Adapter: Low-Rank Adaptation modules trained on the 8,000-example training set.
+    \item IA$^3$ Adapter: Infused Adapter by Inhibiting and Amplifying Inner Activations trained under identical conditions.
+\end{enumerate}
+
+Adapters are implemented using the PEFT framework within the Hugging Face Transformers ecosystem. Hyperparameters, tokenizer configuration, and preprocessing steps are held constant across experiments to ensure fair comparison. No hyperparameter search is performed.
+
+Training is conducted using multi-GPU Distributed Data Parallel (DDP).
+
+QLoRA is not employed in this study.
+
+\subsection{Evaluation Protocol}
+
+All configurations are evaluated on the same held-out test set of 2,000 examples.
+
+A prediction is considered correct only if:
+
+\begin{itemize}
+    \item All three fields (action, quantity, product) exactly match the ground truth.
+    \item The output is valid JSON and can be successfully parsed.
+\end{itemize}
+
+If the model fails to produce valid JSON, the prediction is counted as incorrect.
+
+Performance is measured using Precision, Recall, and F1 Score under strict exact-match criteria. F1 Score serves as the primary comparison metric.
+
+\subsection{Comparative Analysis}
+
+For each model, we report results in the following format:
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Model & Base (Prompt) & LoRA & IA$^3$ \\
+\hline
+... & ... & ... & ... \\
+\hline
+\end{tabular}
+\end{center}
+
+This structure enables direct comparison between prompt-based inference and adapter-based specialization across model scales.
+
+
+\subsection{Adapter-Based Fine-Tuning (LoRA)}
+For the fine-tuning paradigm, we employed Low-Rank Adaptation (LoRA). This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
+
+The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
+
+\begin{equation}
+    h = W_0 x + \left(\frac{\alpha}{r}\right) \Delta W x = W_0 x + \left(\frac{\alpha}{r}\right) BAx
+\end{equation}
+
+In this study, we targeted all linear modules within the transformer architecture to ensure the adapter captured the necessary structural and semantic constraints for JSON generation. Specifically, the adaptation was applied comprehensively to both the attention mechanisms (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj}, \texttt{o\_proj}) and the feed-forward network layers (\texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}). The specific LoRA configuration utilized during fine-tuning included:
+
+\begin{itemize}
+    \item Rank ($r$): $32$. A higher rank was selected to provide sufficient parameter capacity for the complex semantic mapping required in structured parsing tasks.
+    \item Alpha ($\alpha$): $64$. The scaling factor was strictly set to $\alpha = 2r$, a heuristic demonstrated to stabilize training and improve convergence when utilizing higher ranks.
+    \item Dropout: $0.05$, applied to the adapter layers as a regularization measure to prevent overfitting.
+    \item Precision and Compute: Models were trained without 4-bit quantization, instead utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations natively supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
+\end{itemize}
+
+\subsubsection{Optimization and Training Dynamics}
+The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps.
+
+\subsection{Prompt Engineering Strategies}
+To establish a baseline for In-Context Learning (ICL), we implemented three escalating levels of prompt complexity:
+
+\begin{enumerate}
+    \item Minimal Instruction (Zero-Shot): A concise prompt defining the role of the model and the required JSON schema.
+    \item Extended Prompt: This strategy includes detailed edge-case instructions, emphasizing the default quantity logic and strict "no-prose" constraints to prevent conversational "chatter."
+    \item Few-Shot Prompting: Building upon the Extended Prompt, this version includes [Insert Number] high-quality examples of natural language inputs and their corresponding JSON outputs, providing a semantic and structural blueprint for the model.
+\end{enumerate}
+
+\subsection{Evaluation Metrics}
+
+The models were evaluated on two primary dimensions to assess both syntactic integrity and semantic accuracy.
+
+\subsubsection{JSON Validity Rate}
+Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination.
+
+\subsubsection{Structured F1 Score}
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
 
 \begin{equation}
     F_1 = 2 \cdot \frac{P \cdot R}{P + R}
