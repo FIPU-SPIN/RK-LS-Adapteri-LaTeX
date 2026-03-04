@@ -77,29 +77,31 @@
 
 %=================================================================
 % Full title of the paper (Capitalized)
-\Title{Title}
+\Title{Evaluating the Impact of Adapter-Based Fine-Tuning on Structured Parsing Performance in Large Language Models}
 
 % Author Orchid ID: enter ID or remove command
-\newcommand{\orcidauthorA}{0000-0000-0000-000X} % Add \orcidA{} behind the author's name
-%\newcommand{\orcidauthorB}{0000-0000-0000-000X} % Add \orcidB{} behind the author's name
+\newcommand{\orcidauthorA}{0009-0004-4210-5756} % Add \orcidA{} behind the author's name
+\newcommand{\orcidauthorB}{0009-0002-1965-7822}%Luka
+% \newcommand{\orcidauthorC}{0009-0002-1965-7822}%Sandi
+% \newcommand{\orcidauthorC}{0009-0002-1965-7822}%Ivan
 
 % Authors, for the paper (add full first names)
-\Author{Ratomir Karlović $^{1}$\orcidA{}, Luka Sever $^{1}$, Sandi Berossi Šegota $^{1}$ and Ivan Lorencin $^{1}$}
+\Author{Ratomir Karlović $^{1}$\orcidA{}, Luka Sever $^{1}$\orcidB{}, Sandi Berossi Šegota $^{1}$ and Ivan Lorencin $^{1}$}
 
 %\longauthorlist{yes}
 
 % MDPI internal command: Authors, for metadata in PDF
-\AuthorNames{Ratomir Karlović, Luka Sever, Sandi Berossi Šegota, Ivan Lorencin}
+\AuthorNames{Firstname Lastname, Firstname Lastname and Firstname Lastname}
 
 %\longauthorlist{yes}
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address{%
-$^{1}$ \quad Affiliation 1; e-mail@e-mail.com\\
-$^{2}$ \quad Affiliation 2; e-mail@e-mail.com}
+$^{1}$ \quad Faculty of Informatics, Juraj Dobrila University of Pula, Zagrebačka 30, 52100 Pula, Croatia; \\ ratomir.karlovic@unipu.hr (R.K.), luka.sever@unipu.hr (L.S.), sandi.baressi.segota@unipu.hr (S.B.S), ivan.lorencin@unipu.hr (I.L.)\\
+}
 
 % Contact information of the corresponding author
-\corres{Correspondence: e-mail@e-mail.com; Tel.: (optional; include country code; if there are multiple corresponding authors, add author initials) +xx-xxxx-xxx-xxxx (F.L.)}
+\corres{Correspondence: ivan.lorencin@unipu.hr;}
 
 % Current address and/or shared authorship
 %\firstnote{Current address: Affiliation.}  
@@ -291,13 +293,35 @@ The test set remains completely unseen during adapter training and validation. I
 
 \subsection{Model Selection}
 
-To analyze the effect of model scale and architectural variation, we evaluate a heterogeneous suite of LLMs across parameter sizes and training paradigms. Models are grouped into three categories:
+To analyze the effect of model scale and architectural variation, we evaluate a heterogeneous suite of LLMs across parameter sizes and training paradigms. We have selected three models that represent a range of scales and architectural designs, all of which are compatible with adapter-based fine-tuning:
 
-\begin{itemize}
-    \item Large-Scale: Llama 3.3 (70B)
-    \item Mid-Range: DeepSeek-R1 (14B), Phi-4 (14B), Llama 3.1 (8B), Qwen 3 (8B), Granite 3.3 (8B)
-    \item Small-Scale (SLMs): Mistral (7B), Qwen 3 (4B), Gemma 3 (4B), Llama 3.2 (3B), DeepSeek-R1 (1.5B)
-\end{itemize}
+\begin{table}[H]
+\caption{This is a table caption.\label{ModelList}}
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Name & Size\\
+\hline
+Llama 3.1 & 8B \\
+Qwen 3 & 4B \\
+Llama 3.2 & 3B \\
+\hline
+\end{tabular}
+\end{center}
+\end{table}
+
+% \begin{table}[H] 
+% \caption{This is a table caption.\label{tab5}}
+% %\newcolumntype{C}{>{\centering\arraybackslash}X}
+% \begin{tabularx}{\textwidth}{CCC}
+% \toprule
+% \textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
+% \midrule
+% Entry 1		& Data			& Data\\
+% Entry 2		& Data			& Data\\
+% \bottomrule
+% \end{tabularx}
+% \end{table}
 
 All models are evaluated under identical inference conditions with temperature set to 0 to eliminate stochastic variance.
 
