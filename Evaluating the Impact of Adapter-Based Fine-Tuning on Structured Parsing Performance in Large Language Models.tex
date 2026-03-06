@@ -277,18 +277,22 @@ To balance computational feasibility with sufficient diversity for adapter speci
 Each example is paired with a normalized ground-truth JSON annotation containing the three labeled attributes.
 
 \subsection{Data Splits}
-%DODATI PAR RECENINCA
-The corpus is partitioned as follows:
 
+To ensure reliable model evaluation and prevent data leakage during training, the dataset was divided into three disjoint subsets for training, validation, and testing. The split was designed to provide sufficient data for adapter optimization while preserving a representative evaluation set for assessing model generalization.
 
-Based on empirical evidence identifying optimal configurations for LLaMA-based architectures, we targeted all linear modules within the transformer architecture (specifically $W_q, W_k, W_v, W_o$, and MLP layers) to ensure the adapter captured the necessary structural constraints for JSON generation. The specific hyperparameters utilized include:
+The corpus was partitioned as follows:
+
 \begin{itemize}
-    \item Training Set: 8,000 examples used for adapter parameter optimization.
-    \item Validation Set: 2,000 examples used for monitoring convergence and preventing overfitting.
-    \item Test Set: 2,000 disjoint examples reserved exclusively for final evaluation.
+    \item Training set: 8,000 examples used for adapter parameter optimization during supervised fine-tuning.
+    
+    \item Validation set: 2,000 examples used for monitoring model convergence, tuning training dynamics, and preventing overfitting.
+    
+    \item Test set: 2,000 disjoint examples reserved exclusively for the final evaluation of model performance.
 \end{itemize}
 
-The test set remains completely unseen during adapter training and validation. It contains novel paraphrasing patterns and lexical combinations to assess generalization beyond the training distribution.
+The validation and test sets remain completely unseen during adapter training. The test set additionally contains novel paraphrasing patterns and lexical combinations to evaluate the model’s ability to generalize beyond the training distribution.
+
+
 
 \subsection{Model Selection}
 
@@ -382,14 +386,36 @@ The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{
     h = W_0 x + \left(\frac{\alpha}{r}\right) \Delta W x = W_0 x + \left(\frac{\alpha}{r}\right) BAx
 \end{equation}
 
-In this study, we targeted all linear modules within the transformer architecture to ensure the adapter captured the necessary structural and semantic constraints for JSON generation. Specifically, the adaptation was applied comprehensively to both the attention mechanisms (\texttt{q\_proj}, \texttt{k\_proj}, \texttt{v\_proj}, \texttt{o\_proj}) and the feed-forward network layers (\texttt{gate\_proj}, \texttt{up\_proj}, \texttt{down\_proj}). The specific LoRA configuration utilized during fine-tuning included:
+In this study, we targeted all linear modules within the transformer architecture to ensure that the adapter captured the structural and semantic constraints required for reliable JSON generation. The adaptation was applied to both the attention mechanism and the feed-forward network layers, specifically:
+
+\begin{itemize}
+    \item \texttt{q\_proj} – Query projection layer that generates query vectors used to compute attention scores between tokens.
+    
+    \item \texttt{k\_proj} – Key projection layer that produces key vectors used to determine the relevance of tokens during attention computation.
+    
+    \item \texttt{v\_proj} – Value projection layer that encodes the information aggregated through the attention mechanism.
+    
+    \item \texttt{o\_proj} – Output projection layer that combines the results of multiple attention heads and maps them back into the model’s hidden representation space.
+    
+    \item \texttt{gate\_proj} – Gating projection within the feed-forward network that regulates the activation flow in the nonlinear transformation stage.
+    
+    \item \texttt{up\_proj} – Expansion projection layer that increases the dimensionality of hidden representations within the feed-forward block.
+    
+    \item \texttt{down\_proj} – Compression projection layer that reduces the expanded representation back to the original hidden size.
+\end{itemize}
+
+The specific LoRA configuration utilized during fine-tuning included:
 
 \begin{itemize}
     \item Rank ($r$): $32$. A higher rank was selected to provide sufficient parameter capacity for the complex semantic mapping required in structured parsing tasks.
-    \item Alpha ($\alpha$): $64$. The scaling factor was strictly set to $\alpha = 2r$, a heuristic demonstrated to stabilize training and improve convergence when utilizing higher ranks.
-    \item Dropout: $0.05$, applied to the adapter layers as a regularization measure to prevent overfitting.
-    \item Precision and Compute: Models were trained without 4-bit quantization, instead utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations natively supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
+    
+    \item Alpha ($\alpha$): $64$. The scaling factor was set to $\alpha = 2r$, a heuristic commonly used to stabilize training and improve convergence when employing higher ranks.
+    
+    \item Dropout: $0.05$, applied to the adapter layers as a regularization measure to mitigate overfitting.
+    
+    \item Precision and Compute: Training was performed without 4-bit quantization, utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
 \end{itemize}
+
 
 \subsubsection{Optimization and Training Dynamics}
 The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps.
@@ -752,4 +778,3 @@ All appendix sections must be cited in the main text. In the appendices, Figures
 \end{adjustwidth}
 %} % If the paper is ``preprints'', please uncomment this parenthesis.
 \end{document}
-
