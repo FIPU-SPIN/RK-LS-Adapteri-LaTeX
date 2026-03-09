@@ -426,17 +426,17 @@ While most fine-tuning methods focus on adding new structural layers or modifyin
 The IA3 method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
 
 \begin{itemize}
-    \item \textbf{Attention Modulators ($l_k$ and $l_v$):} These vectors enable the model to prioritize specific parts of an input sentence[cite:   ]. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
-    \item \textbf{Feed-Forward Modulator ($l_{ff}$):} This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart.
+    \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence[cite:   ]. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
+    \item Feed-Forward Modulator ($l_{ff}$): This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart.
 \end{itemize}
 
 \subsubsection{Key Advantages for Practical Deployment}
 The IA3 approach offers several distinct benefits for high-precision tasks under resource-constrained conditions:
 
 \begin{itemize}
-    \item \textbf{Extreme Parameter Efficiency:} IA3 represents a highly lightweight version of fine-tuning. It typically updates significantly fewer settings than other popular methods like LoRA, often modifying less than 0.01\% of the total model parameters.
-    \item \textbf{Zero Performance Latency:} Because these signal modulations can be mathematically merged into the original model weights after training, the customized model operates at the same speed as the original version. No additional computational overhead is introduced during the inference phase.
-    \item \textbf{Competitive Accuracy:} Despite its small footprint, IA3 has been demonstrated to match or even outperform significantly more complex fine-tuning methods on specialized reasoning and mathematical tasks.
+    \item Extreme Parameter Efficiency: IA3 represents a highly lightweight version of fine-tuning. It typically updates significantly fewer settings than other popular methods like LoRA, often modifying less than 0.01\% of the total model parameters.
+    \item Zero Performance Latency: Because these signal modulations can be mathematically merged into the original model weights after training, the customized model operates at the same speed as the original version. No additional computational overhead is introduced during the inference phase.
+    \item Competitive Accuracy: Despite its small footprint, IA3 has been demonstrated to match or even outperform significantly more complex fine-tuning methods on specialized reasoning and mathematical tasks.
 \end{itemize}
 
 By utilizing these precise signal modulators, IA3 enables the model to achieve professional-grade precision in structured parsing without the heavy computational costs typically associated with larger fine-tuning strategies \cite{liu2022fewshotparameterefficientfinetuningbetter}.
