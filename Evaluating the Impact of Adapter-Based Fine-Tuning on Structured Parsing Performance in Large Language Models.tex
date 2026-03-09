@@ -416,6 +416,31 @@ The specific LoRA configuration utilized during fine-tuning included:
     \item Precision and Compute: Training was performed without 4-bit quantization, utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
 \end{itemize}
 
+\subsection{Infused Adapter by Inhibiting and Amplifying Inner Activations (IA3)}
+
+While most fine-tuning methods focus on adding new structural layers or modifying a model's global weights, IA3 adopts a minimalist approach by selectively inhibiting or amplifying existing internal signals. Instead of introducing heavy new components, IA3 integrates three specific learnable vectors that act as signal modulators within the transformer's architecture\cite{liu2022fewshotparameterefficientfinetuningbetter}.
+
+
+
+\subsubsection{The Signal Modulation Mechanism}
+The IA3 method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
+
+\begin{itemize}
+    \item \textbf{Attention Modulators ($l_k$ and $l_v$):} These vectors enable the model to prioritize specific parts of an input sentence[cite:   ]. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
+    \item \textbf{Feed-Forward Modulator ($l_{ff}$):} This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart.
+\end{itemize}
+
+\subsubsection{Key Advantages for Practical Deployment}
+The IA3 approach offers several distinct benefits for high-precision tasks under resource-constrained conditions:
+
+\begin{itemize}
+    \item \textbf{Extreme Parameter Efficiency:} IA3 represents a highly lightweight version of fine-tuning. It typically updates significantly fewer settings than other popular methods like LoRA, often modifying less than 0.01\% of the total model parameters.
+    \item \textbf{Zero Performance Latency:} Because these signal modulations can be mathematically merged into the original model weights after training, the customized model operates at the same speed as the original version. No additional computational overhead is introduced during the inference phase.
+    \item \textbf{Competitive Accuracy:} Despite its small footprint, IA3 has been demonstrated to match or even outperform significantly more complex fine-tuning methods on specialized reasoning and mathematical tasks.
+\end{itemize}
+
+By utilizing these precise signal modulators, IA3 enables the model to achieve professional-grade precision in structured parsing without the heavy computational costs typically associated with larger fine-tuning strategies \cite{liu2022fewshotparameterefficientfinetuningbetter}.
+
 
 \subsubsection{Optimization and Training Dynamics}
 The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps.
