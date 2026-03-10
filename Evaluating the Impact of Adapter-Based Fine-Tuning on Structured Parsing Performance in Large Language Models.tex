@@ -116,7 +116,7 @@ $^{1}$ \quad Faculty of Informatics, Juraj Dobrila University of Pula, Zagrebač
 
 % Abstract (Do not insert blank lines, i.e. \\) 
 \abstract{Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods,such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
-This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy, consistency, and robustness.
+This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy and consistency.
 The experiment uses the same controlled shopping-cart parsing task and dataset of 1000 synthetic commands to ensure direct comparability. Results will quantify the trade-off between computational cost and performance gains, offering evidence-based insights into whether fine-tuning is a justified investment compared to advanced prompt engineering.
 The expected contribution is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.}
 
@@ -180,7 +180,7 @@ The expected contribution is a clear, empirical framework for deciding when fine
 The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
 A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
 To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using multiple models. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
-The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking multiple models on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
+The main aim of this research is to examine the trade-offs between prompt engineering and PEFT when applied to structured parsing tasks. In particular, the study investigates how different adaptation strategies influence the ability of LLMs to generate accurate and valid structured outputs. The primary contribution of this work is a structured empirical evaluation framework for benchmarking multiple models and adaptation approaches on structured parsing tasks. The results provide practical insights into the relative effectiveness of prompting strategies and adapter-based methods, highlighting scenarios in which lightweight fine-tuning can offer measurable improvements in reliability compared to prompt-only configurations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Works}
@@ -189,7 +189,7 @@ The rapid growth of LLMs has necessitated strategies for adapting them efficient
 
 Ding et al. \citep{ding2023parameter} proposed a unified framework called delta-tuning, which adjusts only a small fraction of model parameters. Through extensive evaluation on over 100 NLP tasks, they found that delta-tuning achieved performance comparable to full fine-tuning while significantly reducing GPU memory usage and accelerating backpropagation. Larger models not only benefited more from minimal parameter updates but also converged faster, reinforcing the potential of adapter-based methods to enhance task-specific performance efficiently.
 
-Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and Infused Adapter by Inhibiting and Amplifying Inner Activations (IA3). Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
+Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and Infused Adapter by Inhibiting and Amplifying Inner Activations (IA$^3$). Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
 
 Razuvayevskaya et al. \citep{razuvayevskaya2024comparison} compared parameter-efficient techniques and full fine-tuning for multilingual news classification. Using XLM-RoBERTa Large, they showed that LoRA and bottleneck adapters could reduce trainable parameters by 140–280 times while maintaining competitive accuracy. Their results suggested that PEFT strategies can outperform traditional prompting approaches, especially when sufficient source data is available.
 
@@ -213,29 +213,31 @@ Lin Mu et al. \citep{mu2025robustness} introduced Robustness of Prompting (RoP),
 
 Sajjadi Mohammadabadi et al. \citep{sajjadi2025survey} surveyed LLM architectures and adaptation methods, emphasizing the efficiency of PEFT, instruction tuning, and RLHF. They noted that adapter-based fine-tuning can deliver significant performance gains relative to prompting, justifying its computational cost in applied settings.
 
-Trad and Chehab \citep{trad2024prompt} studied phishing detection LLMs and found that while refined prompting improved performance, fine-tuned models achieved higher F1-scores and superior reliability, demonstrating that the cost of PEFT is justified when high precision is required.
+Trad and Chehab \citep{trad2024prompt} studied phishing detection LLMs and found that while refined prompting improved performance, fine-tuned models achieved higher F1 Scores and superior reliability, demonstrating that the cost of PEFT is justified when high precision is required.
 
 Pornprasit and Tantithamthavorn \citep{pornprasit2024fine} evaluated LLM-based code review, showing that fine-tuning GPT-3.5 achieved 73–74\% higher Exact Match rates than prompting approaches. Their study confirmed that adapter-based fine-tuning can deliver meaningful gains even with modest training data.
 
-Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting adaptation outcomes with minimal trials. Their results indicated that fine-tuning consistently outperformed in-context learning in medium to high-cost scenarios, supporting the view that adapter PEFT justifies its resource investment by providing predictable and superior performance.
+Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting adaptation outcomes with minimal trials. Their results indicated that fine-tuning consistently outperformed in-context learning (ICL) in medium to high-cost scenarios, supporting the view that adapter PEFT justifies its resource investment by providing predictable and superior performance.
 
-Based on the cumulative evidence from these studies, the overarching goal of this work is to investigate how adapter-based parameter-efficient fine-tuning (PEFT) compares to advanced prompting in terms of structured task accuracy, output stability, robustness, and cost-effectiveness. Accordingly, the following research hypotheses are formulated:
+Based on the cumulative evidence from previous studies, the goal of this work is to examine how adapter-based PEFT compares with advanced prompting strategies for structured parsing tasks. In particular, the study explores how different adaptation approaches influence structured output accuracy and reliability when generating JSON-formatted outputs. Guided by prior literature, the following hypotheses are considered:
 
 \begin{itemize}
-\item H1: Parameter-efficient fine-tuning methods improve structured output generation performance compared to prompt-based adaptation strategies.
 
-\item H2: LoRA-based adapters achieve higher structured extraction accuracy than other parameter-efficient tuning techniques such as IA3.
+\item H1: PEFT methods may provide improvements in structured output generation performance compared to prompt-based adaptation strategies.
 
-\item H3: Larger models benefit less from advanced prompt engineering than smaller models, indicating that parameter-efficient adaptation can compensate for differences in model scale.
+\item H2: LoRA-based adapters may achieve higher structured extraction accuracy than other parameter-efficient tuning techniques such as IA$^3$.
 
-\item H4: Prompt engineering alone can achieve high structured output accuracy, but parameter-efficient fine-tuning provides more consistent and near-perfect results.
+\item H3: Models of different sizes may respond differently to advanced prompt engineering strategies, suggesting that parameter-efficient adaptation could partially compensate for differences in model scale.
+
+\item H4: Prompt engineering alone may achieve high structured output accuracy, while PEFT may provide more consistent results across models.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \section{Methodology}
 
-This section describes the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL) for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of large language models (LLMs) when converting unstructured natural language instructions into strictly formatted JSON objects. This methodology adapts the comparative benchmarking framework established by \citep{karlovic2025large} and applies its evaluative principles to the specific challenges of a controlled structured parsing domain.
+This section describes the experimental framework designed to evaluate the trade-offs between PEFT and advanced ICL for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of LLMs when converting unstructured natural language instructions into strictly formatted JSON objects. This methodology adapts the comparative benchmarking framework established by \citep{karlovic2025large} and applies its evaluative principles to the specific challenges of a controlled structured parsing domain.
 
 \subsection{Task Definition}
 
@@ -262,7 +264,7 @@ The mapping from natural language to JSON is deterministic, enabling objective e
 
 \subsection{Dataset Construction}
 
-The dataset consists of 12,000 synthetically generated but linguistically diverse shopping instructions, created in collaboration with industry partners to reflect realistic user interaction patterns.
+The dataset consists of 12,000 synthetically generated but linguistically diverse shopping instructions, created in collaboration with industry partners to reflect realistic user interaction patterns. The dataset was synthetically generated to simulate natural language commands with variations in phrasing, quantity expressions, and product names, enabling evaluation of the models' ability to generalize across linguistic variations while producing deterministic structured outputs.
 
 Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization. Diversity mechanisms include:
 
@@ -270,10 +272,29 @@ Although synthetically produced, the corpus incorporates substantial variation t
 To balance computational feasibility with sufficient diversity for adapter specialization, the 12,000 examples were partitioned into three disjoint subsets:
 \begin{itemize}
     \item Verb paraphrasing (e.g., add, insert, remove, delete, take out)
-    \item Explicit and implicit quantity expressions
+    % \item Explicit and implicit quantity expressions
     \item Variable grammatical constructions
     \item Multi-word paraphrases and lexical substitutions
 \end{itemize}
+
+In Table \ref{tab:dataset_examples}, we present representative examples from the dataset, illustrating the range of linguistic variations and the corresponding JSON annotations.
+
+\begin{table}[H]
+\caption{Dataset Examples and Corresponding JSON Annotations}
+\label{tab:dataset_examples}
+\begin{center}
+\begin{tabularx}{\textwidth}{Xccc}
+\hline
+user\_input &	action &	product &	quantity\\
+\hline
+Add 14 onions &	add &	onions &	14\\
+I need to remove 3 oranges &	remove &	oranges &	3\\
+I changed my mind about those socks, take 3 out. &	remove &	socks &	3\\
+Please grab 14 granola &    add &	granola &	14\\
+\hline
+\end{tabularx}
+\end{center}
+\end{table}
 
 Each example is paired with a normalized ground-truth JSON annotation containing the three labeled attributes.
 
@@ -332,8 +353,6 @@ Adapters are implemented using the PEFT framework within the Hugging Face Transf
 
 Training is conducted using multi-GPU Distributed Data Parallel (DDP).
 
-QLoRA is not employed in this study.
-
 \subsection{Evaluation Protocol}
 
 All configurations are evaluated on the same held-out test set of 2,000 examples.
@@ -367,7 +386,7 @@ This structure enables direct comparison between prompt-based inference and adap
 
 
 \subsection{Adapter-Based Fine-Tuning (LoRA)}
-For the fine-tuning paradigm, we employed Low-Rank Adaptation (LoRA). This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
+For the fine-tuning paradigm, we employed LoRA. This technique was chosen for its ability to maintain the underlying general knowledge of the base model while specializing its output structure for JSON parsing with minimal computational overhead.
 
 The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
 
@@ -401,14 +420,14 @@ The specific LoRA configuration utilized during fine-tuning included:
     \item Precision and Compute: Training was performed without 4-bit quantization, utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
 \end{itemize}
 
-\subsection{Infused Adapter by Inhibiting and Amplifying Inner Activations (IA3)}
+\subsection{Infused Adapter by Inhibiting and Amplifying Inner Activations (IA$^3$)}
 
-While most fine-tuning methods focus on adding new structural layers or modifying a model's global weights, IA3 adopts a minimalist approach by selectively inhibiting or amplifying existing internal signals. Instead of introducing heavy new components, IA3 integrates three specific learnable vectors that act as signal modulators within the transformer's architecture\cite{liu2022fewshotparameterefficientfinetuningbetter}.
+While most fine-tuning methods focus on adding new structural layers or modifying a model's global weights, IA$^3$ adopts a minimalist approach by selectively inhibiting or amplifying existing internal signals. Instead of introducing heavy new components, IA$^3$ integrates three specific learnable vectors that act as signal modulators within the transformer's architecture\cite{liu2022fewshotparameterefficientfinetuningbetter}.
 
 
 
 \subsubsection{The Signal Modulation Mechanism}
-The IA3 method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
+The IA$^3$ method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
 
 \begin{itemize}
     \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
@@ -416,22 +435,22 @@ The IA3 method utilizes a mathematical operation known as a Hadamard product to 
 \end{itemize}
 
 \subsubsection{Key Advantages for Practical Deployment}
-The IA3 approach offers several distinct benefits for high-precision tasks under resource-constrained conditions:
+The IA$^3$ approach offers several distinct benefits for high-precision tasks under resource-constrained conditions:
 
 \begin{itemize}
-    \item Extreme Parameter Efficiency: IA3 represents a highly lightweight version of fine-tuning. It typically updates significantly fewer settings than other popular methods like LoRA, often modifying less than 0.01\% of the total model parameters.
+    \item Extreme Parameter Efficiency: IA$^3$ represents a highly lightweight version of fine-tuning. It typically updates significantly fewer settings than other popular methods like LoRA, often modifying less than 0.01\% of the total model parameters.
     \item Zero Performance Latency: Because these signal modulations can be mathematically merged into the original model weights after training, the customized model operates at the same speed as the original version. No additional computational overhead is introduced during the inference phase.
-    \item Competitive Accuracy: Despite its small footprint, IA3 has been demonstrated to match or even outperform significantly more complex fine-tuning methods on specialized reasoning and mathematical tasks.
+    \item Competitive Accuracy: Despite its small footprint, IA$^3$ has been demonstrated to match or even outperform significantly more complex fine-tuning methods on specialized reasoning and mathematical tasks.
 \end{itemize}
 
-By utilizing these precise signal modulators, IA3 enables the model to achieve professional-grade precision in structured parsing without the heavy computational costs typically associated with larger fine-tuning strategies \cite{liu2022fewshotparameterefficientfinetuningbetter}.
+By utilizing these precise signal modulators, IA$^3$ enables the model to achieve professional-grade precision in structured parsing without the heavy computational costs typically associated with larger fine-tuning strategies \cite{liu2022fewshotparameterefficientfinetuningbetter}.
 
 
 \subsubsection{Optimization and Training Dynamics}
-The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps.
+The Supervised Fine-Tuning (SFT) phase was executed over 3 epochs with a maximum sequence length of 1024 tokens. To optimize memory footprint during backpropagation, gradient checkpointing was enabled. The training pipeline utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with a peak learning rate of $2 \times 10^{-4}$, a weight decay of $0.01$, and a warm-up ratio of $3\%$ to ensure early-stage stability. An effective batch size of 32 was maintained by utilizing a per-device batch size of 8 combined with 4 gradient accumulation steps. The near-perfect performance achieved by LoRA-based adapters should be interpreted in the context of the controlled dataset and relatively constrained output schema used in this study. Because the task involves mapping natural language commands to a fixed JSON structure with a limited number of fields, adapter-based fine-tuning can rapidly learn task-specific patterns. While this result demonstrates the effectiveness of PEFT methods for structured extraction tasks, more complex schemas and real-world datasets may produce larger performance differences between adaptation strategies.
 
 \subsection{Prompt Engineering Strategies}
-To establish a baseline for In-Context Learning (ICL), we implemented three escalating levels of prompt complexity:
+To establish a baseline for ICL, we implemented three escalating levels of prompt complexity:
 
 \begin{enumerate}
     \item Minimal Instruction (Zero-Shot): A concise prompt defining the role of the model and the required JSON schema.
@@ -444,10 +463,10 @@ To establish a baseline for In-Context Learning (ICL), we implemented three esca
 The models were evaluated on two primary dimensions to assess both syntactic integrity and semantic accuracy.
 
 \subsubsection{JSON Validity Rate}
-Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination.
+Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination. JSON Validity Rate measures the proportion of generated outputs that conform to valid JSON syntax, ensuring that responses can be reliably parsed by downstream systems.
 
 \subsubsection{Structured F1 Score}
-For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$) \cite{wang2024adaptable}:
+For all valid JSON outputs, we calculate the F1 Score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 Score is defined as the harmonic mean of precision ($P$) and recall ($R$) \cite{wang2024adaptable}:
 
 \begin{equation}
     F_1 = 2 \cdot \frac{P \cdot R}{P + R}
@@ -456,14 +475,14 @@ For all valid JSON outputs, we calculate the F1 score. This requires an exact ma
 We report the macro-averaged F1 across all fields to provide a singular, robust measure of parsing performance.
 
 \section{Results and discussion}
-This section evaluates the performance of three large language models:Llama 3.1 8B, Llama 3.2 3B, and Qwen3 4B under multiple adaptation strategies, including minimal instruction prompting, extended prompting, few-shot prompting, and parameter-efficient fine-tuning methods (IA³ and LoRA). The evaluation was conducted on a dataset of 2000 samples, with performance measured using exact-match precision, recall, F1-score, and accuracy for structured JSON output generation. Table~\ref{tab:overallresults}  summarizes the overall results across all evaluated approaches.
+This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B, and Qwen3 4B under multiple adaptation strategies, including minimal instruction prompting, extended prompting, few-shot prompting, and PEFT methods (IA$^3$ and LoRA). The evaluation was conducted on a dataset of 2000 samples, with performance measured using Exact Match Accuracy, F1 Score, Macro-Averaged F1, and JSON Validity Rate for structured JSON output generation. Table~\ref{tab:overallresults}  summarizes the overall results across all evaluated approaches.
 \begin{table}[H] 
 %\small % Change table font size
 \caption{Overall results across all evaluated approaches\label{tab:overallresults}}
 %\isPreprints{\centering}{} % Only used for preprints
 \begin{tabularx}{\textwidth}{CCCCCC}
 \toprule
-\textbf{Model}	& \textbf{Exact match accuracy}	 & \textbf{F1 score} & \textbf{Macro-Averaged F1} & \textbf{JSON Validity Rate} & \textbf{Approach}\\
+\textbf{Model}	& \textbf{Exact match accuracy}	 & \textbf{F1 Score} & \textbf{Macro-Averaged F1} & \textbf{JSON Validity Rate} & \textbf{Approach}\\
 \midrule
 Llama 3.1 8B		& 0.965			& 0.982			& 0.985			& 1.000			& Minimal Instruction Prompting\\
 Llama 3.2 3B		& 0.927			& 0.962  		& 0.983  		& 0.998  		& Minimal Instruction Prompting	\\
@@ -477,51 +496,86 @@ Qwen3 4B		    & 0.949			& 0.974  		& 0.989  		& 0.997  		& Few-Shot Prompting	\\
 Llama 3.1 8B		& 1.000			& 1.000			& 1.000			& 1.000			& LoRA\\
 Llama 3.2 3B		& 0.999			& 0.999  		& 1.000  		& 1.000  		& LoRA	\\
 Qwen3 4B		    & 0.999			& 0.999  		& 0.999  		& 1.000  		& LoRA	\\
-Llama 3.1 8B		& 0.960			& 0.980			& 0.992			& 0.997			& IA³\\
-Llama 3.2 3B		& 0.976			& 0.988  		& 0.996  		& 1.000  		& IA³	\\
-Qwen3 4B		    & 0.923			& 0.960  		& 0.985  		& 1.000  		& IA³	\\
+Llama 3.1 8B		& 0.960			& 0.980			& 0.992			& 0.997			& IA$^3$\\
+Llama 3.2 3B		& 0.976			& 0.988  		& 0.996  		& 1.000  		& IA$^3$	\\
+Qwen3 4B		    & 0.923			& 0.960  		& 0.985  		& 1.000  		& IA$^3$	\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-The results indicate that all models achieve high performance across prompting-based approaches, with exact match F1 scores consistently exceeding 0.96. Among prompting methods, the minimal instruction prompt produced the strongest overall performance, with the Qwen3 4B model achieving an F1 score of 0.996 and an exact match accuracy of 0.992. This result suggests that, for tasks involving structured output generation, carefully designed but concise prompts may be sufficient to guide model behavior without requiring extensive contextual examples.
+The results indicate that all models achieve high performance across prompting-based approaches, with exact match F1 Scores consistently exceeding 0.96. Among prompting methods, the minimal instruction prompt produced the strongest overall performance, with the Qwen3 4B model achieving an F1 Score of 0.996 and an exact match accuracy of 0.992. A visual comparison of model performance under minimal instruction prompting is presented in Figure~\ref{fig:minimal_prompt_results}, which illustrates the F1 Score achieved by each evaluated model. This result suggests that, for tasks involving structured output generation, carefully designed but concise prompts may be sufficient to guide model behavior without requiring extensive contextual examples.
 
-Extended prompting also yielded strong results, with Qwen3 4B reaching an F1 score of 0.994, slightly below the minimal prompt configuration. In contrast, the few-shot prompting approach resulted in slightly lower performance, with F1 scores ranging between 0.970 and 0.974 across models. This decrease may indicate that introducing multiple examples increases prompt complexity and token length, which can occasionally introduce ambiguity or distract the model from the core instruction.
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/minimal_instruction_results.png}
+\caption{F1 Score under Minimal Instruction Prompting\label{fig:minimal_prompt_results}}
+\end{figure}
+
+
+Extended prompting also yielded strong results, with Qwen3 4B reaching an F1 Score of 0.994, slightly below the minimal prompt configuration. The F1 Score performance of the evaluated models under the extended prompting configuration is illustrated in Figure~\ref{fig:extended_results}, highlighting the small differences in model performance when additional instructional context is provided.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/extended_results.png}
+\caption{F1 Score under Extended Prompting\label{fig:extended_results}}
+\end{figure}
+
+
+
+In contrast, the few-shot prompting approach resulted in slightly lower performance, with F1 Scores ranging between 0.970 and 0.974 across models. Figure~\ref{fig:fewshot_prompt_results} presents the F1 Score comparison for the few-shot prompting configuration across the evaluated models, illustrating the slightly lower peak performance relative to other prompting strategies.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/few_shot_results.png}
+\caption{F1 Score under Few-Shot Prompting\label{fig:fewshot_prompt_results}}
+\end{figure}
+
+
+This decrease may indicate that introducing multiple examples increases prompt complexity and token length, which can occasionally introduce ambiguity or distract the model from the core instruction. 
 
 Across all prompt-based strategies, Qwen3 4B consistently achieved the highest performance, followed by Llama 3.1 8B and Llama 3.2 3B. This suggests that architectural differences and pretraining strategies can significantly influence the ability of models to follow structured output constraints.
 
 \subsection{Impact of Prompt Engineering Strategies}
 Prompt engineering strategies were evaluated to determine how different instruction styles influence structured output generation performance.
 
-Among the tested approaches, minimal instruction prompting demonstrated the best average performance, achieving an average F1 score of 0.980 across models. The relatively high standard deviation (0.017) suggests that model size and architecture influence how effectively concise prompts are interpreted.
+Among the tested approaches, minimal instruction prompting demonstrated the best average performance, achieving an average F1 Score of 0.980 across models. The relatively high standard deviation (0.017) suggests that model size and architecture influence how effectively concise prompts are interpreted.
 
-The extended prompt configuration, which provides additional instructions and constraints, produced an average F1 score of 0.983. While slightly higher in average performance, the improvement over minimal prompts was marginal. This indicates that once models clearly understand the task structure, additional prompt elaboration offers limited gains.
+The extended prompt configuration, which provides additional instructions and constraints, produced an average F1 Score of 0.983. While slightly higher in average performance, the improvement over minimal prompts was marginal. This indicates that once models clearly understand the task structure, additional prompt elaboration offers limited gains.
 
-Few-shot prompting showed the lowest overall performance, with an average F1 score of 0.972 and the lowest variability (standard deviation of 0.002). This suggests that while few-shot examples provide consistent guidance across models, they do not necessarily improve peak performance for this specific task. One possible explanation is that the task-mapping natural language input into a fixed JSON schema is already well-aligned with the pretraining objectives of modern LLMs.
+Few-shot prompting showed the lowest overall performance, with an average F1 Score of 0.972 and the lowest variability (standard deviation of 0.002). This suggests that while few-shot examples provide consistent guidance across models, they do not necessarily improve peak performance for this specific task. One possible explanation is that the task of mapping natural language inputs into a fixed JSON schema is already well aligned with the pretraining objectives of modern LLMs.
 
-An analysis of individual field performance further reveals that the product field was consistently the most challenging attribute to predict, particularly in the few-shot configuration, where its F1 score decreased to 0.949 for the best-performing model. In contrast, the action and quantity fields maintained near-perfect performance across most configurations.
+An analysis of individual field performance further reveals that the product field was consistently the most challenging attribute to predict, particularly in the few-shot configuration, where its F1 Score decreased to 0.949 for the best-performing model. In contrast, the action and quantity fields maintained near-perfect performance across most configurations.
 
 These results highlight that prompt complexity does not always correlate with improved performance, especially for tasks requiring deterministic structured outputs.
 
 \subsection{Performance of Parameter-Efficient Fine-Tuning Methods}
-To evaluate the effectiveness of parameter-efficient adaptation methods, two widely used techniques IA³ and LoRA were applied to the evaluated models.
+To evaluate the effectiveness of parameter-efficient adaptation methods, two widely used techniques, IA$^3$ and LoRA were applied to the evaluated models.
 
-The IA³ adapter achieved strong results, with F1 scores ranging from 0.960 to 0.988 across models. The best IA³ configuration was obtained using Llama 3.2 3B, which achieved an F1 score of 0.988 and exact match accuracy of 0.976. Interestingly, this result surpasses the performance of the same base model under all prompt-based configurations, indicating that lightweight parameter adaptation can significantly improve structured prediction capabilities.
+The IA$^3$ adapter achieved strong results, with F1 Scores ranging from 0.960 to 0.988 across models. Figure~\ref{fig:ia3_results} illustrates the F1 Score performance of the evaluated models when using IA$^3$ adapters, providing a visual comparison with the prompt-based configurations discussed earlier.
 
-However, the most notable result was achieved using LoRA adapters, which produced near-perfect performance across all evaluated models. The Llama 3.1 8B LoRA configuration achieved a perfect score, with F1, precision, recall, and accuracy all equal to 1.000, successfully predicting all 2000 samples.
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/ia3_results.png}
+\caption{F1 Score under IA$^3$ Adaptation\label{fig:ia3_results}}
+\end{figure}
 
-Similarly, Llama 3.2 3B and Qwen3 4B LoRA models achieved F1 scores of 0.999, missing only two and three samples respectively. These results demonstrate the exceptional effectiveness of LoRA-based adaptation for structured generation tasks.
+The best IA$^3$ configuration was obtained using Llama 3.2 3B, which achieved an F1 Score of 0.988 and exact match accuracy of 0.976. Interestingly, this result surpasses the performance of the same base model under all prompt-based configurations, indicating that lightweight parameter adaptation can significantly improve structured prediction capabilities.
 
-The superiority of LoRA in this setting can be attributed to its ability to introduce low-rank trainable matrices into attention layers, enabling the model to learn task-specific patterns without modifying the majority of base model parameters. This mechanism allows efficient adaptation while preserving the underlying knowledge learned during pretraining.
+However, the most notable results were achieved using LoRA adapters, which produced near-perfect performance across all evaluated models. The Llama 3.1 8B LoRA configuration achieved a perfect score, with F1, precision, recall, and accuracy all equal to 1.000, successfully predicting all 2000 samples.
+
+Similarly, Llama 3.2 3B and Qwen3 4B LoRA models achieved F1 Scores of 0.999, missing only two and three samples respectively. These results demonstrate the exceptional effectiveness of LoRA-based adaptation for structured generation tasks. The F1 Score results for the LoRA-adapted models are shown in Figure~\ref{fig:lora_results}, demonstrating the near-perfect performance achieved across all evaluated models.
+
+\begin{figure}[H]
+\includegraphics[width=\textwidth]{figures/lora_results.png}
+\caption{F1 Score under LoRA Adaptation\label{fig:lora_results}}
+\end{figure}
+
+The superiority of LoRA in this setting can be attributed to its ability to introduce low-rank trainable matrices into attention layers, enabling the model to learn task-specific patterns without modifying the majority of base model parameters. This allows the model to specialize for the target task while preserving most of the pretrained model parameters.
 
 \subsection{Comparison Between Prompt-Based and Adapter-Based Adaptation}
-A comparison between prompt-based strategies and parameter-efficient fine-tuning methods reveals several important insights.
+A comparison between prompt-based strategies and PEFT methods reveals several important insights.
 
-First, prompt-based approaches already achieve very strong baseline performance, with F1 scores exceeding 0.96 in all tested configurations. This confirms the strong in-context learning capabilities of modern LLMs.
+First, prompt-based approaches already achieve very strong baseline performance, with F1 Scores exceeding 0.96 in all tested configurations. This confirms the strong ICL capabilities of modern LLMs.
 
-However, parameter-efficient fine-tuning particularly LoRA consistently outperformed prompt-based methods, achieving near-perfect results. This suggests that even lightweight model adaptation can significantly improve reliability in tasks requiring strictly formatted outputs.
+However, PEFT, particularly LoRA consistently outperformed prompt-based methods, achieving near-perfect results. This suggests that even lightweight model adaptation can significantly improve reliability in tasks requiring strictly formatted outputs.
 
-Another important observation concerns model size efficiency. The Llama 3.2 3B model with LoRA achieved performance comparable to or better than larger models using prompting alone. This finding indicates that parameter-efficient fine-tuning may enable smaller models to achieve competitive performance while significantly reducing computational costs.
+Another important observation concerns model size efficiency. The Llama 3.2 3B model with LoRA achieved performance comparable to or better than larger models using prompting alone. This finding indicates that PEFT may enable smaller models to achieve competitive performance while significantly reducing computational costs.
 
 From a practical perspective, the choice between prompting and fine-tuning depends on several factors:
 \begin{table}[H] 
@@ -538,33 +592,35 @@ Flexible for multiple tasks		& Improved performance for structured prediction ta
 \end{tabularx}
 \end{table}
 
-Thus, while prompt engineering remains a powerful and flexible technique, adapter-based tuning provides superior consistency when deterministic outputs are required.
+Overall, while prompt engineering remains a powerful and flexible technique, adapter-based tuning provides superior consistency when deterministic outputs are required.
 
 \subsection{Variability Across Models}
 The evaluation also reveals differences in how models respond to adaptation strategies.
 
-Qwen3 4B consistently performed best in prompt-based scenarios, suggesting strong instruction-following capabilities and robust in-context learning performance.
+Qwen3 4B consistently performed best in prompt-based scenarios, suggesting strong instruction-following capabilities and robust ICL performance.
 
-In contrast, the Llama models benefited more from parameter-efficient fine-tuning, particularly with LoRA. This observation may reflect differences in pretraining data composition, tokenizer design, or alignment procedures.
+In contrast, the Llama models benefited more from PEFT, particularly with LoRA. This observation may reflect differences in pretraining data composition, tokenizer design, or alignment procedures between the evaluated model families.
 
 Furthermore, performance differences between 3B and 8B parameter models were relatively small, especially after adapter-based tuning. This suggests that task-specific adaptation can compensate for differences in model scale, an important consideration for deployment scenarios with limited computational resources.
 
+These findings suggest that organizations deploying LLM based information extraction systems can achieve high accuracy using prompt-based approaches, while PEFT offers improved reliability when deterministic structured outputs are required.
+
 \section{Limitations and Future Work}
-Although the experimental results demonstrate the effectiveness of both prompt engineering and parameter-efficient fine-tuning (PEFT) for structured output generation, several limitations of the study should be acknowledged.
+Although the experimental results demonstrate the effectiveness of both prompt engineering and PEFT for structured output generation, several limitations of the study should be acknowledged.
 
 First, the evaluation was conducted on a synthetic dataset consisting of 2000 samples with a relatively simple schema, containing only three output attributes (action, product, and quantity). While this controlled setup enables clear evaluation of structured extraction performance, it does not fully capture the complexity of real-world information extraction tasks. In practical applications, schemas are often significantly larger and may include hierarchical structures, optional fields, or ambiguous entities, which can introduce additional challenges for language models.
 
-Second, the study evaluates model performance using Exact Match Accuracy, F1-score, Macro-Averaged F1, and JSON Validity Rate. These metrics effectively measure structured output correctness and formatting reliability, particularly for deterministic JSON generation tasks. However, other important evaluation aspects such as inference latency, memory consumption, and training time were not systematically analyzed. These factors may influence the practical selection of adaptation strategies in real-world deployments.
+Second, the study evaluates model performance using Exact Match Accuracy, F1 Score, Macro-Averaged F1, and JSON Validity Rate. These metrics effectively measure structured output correctness and formatting reliability, particularly for deterministic JSON generation tasks. However, other important evaluation aspects such as inference latency, memory consumption, and training time were not systematically analyzed. These factors may influence the practical selection of adaptation strategies in real-world deployments.
 
 Another limitation concerns the hardware requirements associated with adapter-based fine-tuning. Although PEFT methods significantly reduce the number of trainable parameters compared to full fine-tuning, training adapters for modern LLMs still requires substantial computational resources, including GPUs with sufficient memory capacity. Hardware constraints can restrict the feasible configuration of training parameters such as batch size, learning rate schedules, adapter rank, and training duration. As a result, the final performance of adapter-based methods may vary depending on the available computational environment and the chosen hyperparameter configuration.
 
-Related to this, the study does not perform an extensive hyperparameter optimization for adapter training. Adapter-based methods such as LoRA and IA³ can be sensitive to parameter choices, including rank values, scaling factors, dropout rates, and learning rates. Different configurations may produce varying results even when applied to the same base model and dataset. Consequently, the performance observed in this work should be interpreted as representative of a specific configuration rather than the absolute performance ceiling of each method.
+Related to this, the study does not perform an extensive hyperparameter optimization for adapter training. Adapter-based methods such as LoRA and IA$^3$ can be sensitive to parameter choices, including rank values, scaling factors, dropout rates, and learning rates. Different configurations may produce varying results even when applied to the same base model and dataset. Consequently, the performance observed in this work should be interpreted as representative of a specific configuration rather than the absolute performance ceiling of each method.
 
 Finally, while the models achieved very high performance on the evaluated task, particularly when using LoRA adapters, the dataset characteristics and limited schema complexity may contribute to this near-perfect performance. More complex structured extraction scenarios may reveal larger performance differences between adaptation strategies.
 
 Future work could extend this study in several directions. One promising avenue involves evaluating the proposed approaches on larger and more complex datasets, including real-world information extraction tasks with richer schemas and nested JSON structures. Such datasets would provide a more challenging benchmark for assessing the robustness and generalization capabilities of both prompting and adapter-based approaches.
 
-Another important direction is the systematic evaluation of computational efficiency and resource requirements, including training time, GPU memory usage, and inference latency. Incorporating these factors would provide a more comprehensive comparison between prompt-based adaptation and parameter-efficient fine-tuning.
+Another important direction is the systematic evaluation of computational efficiency and resource requirements, including training time, GPU memory usage, and inference latency. Incorporating these factors would provide a more comprehensive comparison between prompt-based adaptation and PEFT.
 
 Future studies could also explore hyperparameter sensitivity and optimization for adapter-based methods, analyzing how variations in adapter rank, learning rate, and training schedules influence performance. This would help identify stable configurations that provide consistent results across different hardware environments.
 
@@ -572,24 +628,18 @@ Finally, additional research may investigate robustness and generalization prope
 
 \section{Conclusion}
 
-This study investigated the effectiveness of prompt engineering strategies and PEFT methods for adapting large language models to structured output generation tasks. Specifically, the experiments evaluated multiple prompting configurations (minimal instruction prompting, extended prompting, and few-shot prompting) alongside two widely used adapter-based techniques, IA³ and LoRA. The evaluation was conducted using three open-source LLMs of varying sizes, assessing their ability to transform natural language inputs into a predefined JSON schema.
+This study investigated the effectiveness of prompt engineering strategies and PEFT methods for adapting LLMs to structured output generation tasks. Specifically, the experiments evaluated multiple prompting configurations (minimal instruction prompting, extended prompting, and few-shot prompting) alongside two widely used adapter-based techniques, IA$^3$ and LoRA. The evaluation was conducted using three open-source LLMs of varying sizes, assessing their ability to transform natural language inputs into a predefined JSON schema.
 
-The experimental results demonstrate that modern LLMs exhibit strong baseline performance in structured extraction tasks even without parameter updates. Prompt-based approaches consistently achieved high accuracy across all evaluated models, with exact match F1 scores exceeding 0.96. Among prompting strategies, minimal instruction prompts proved particularly effective, indicating that concise task descriptions are often sufficient for guiding structured generation.
+The experimental results demonstrate that modern LLMs exhibit strong baseline performance in structured extraction tasks even without parameter updates. Prompt-based approaches consistently achieved high accuracy across all evaluated models, with exact match F1 Scores exceeding 0.96. Among prompting strategies, minimal instruction prompts proved particularly effective, indicating that concise task descriptions are often sufficient for guiding structured generation.
 
-Despite the strong performance of prompt engineering methods, the results show that parameter-efficient fine-tuning can further enhance reliability and accuracy. In particular, LoRA-based adapters achieved near-perfect results across all tested models, with the best configuration reaching a perfect exact match score on the evaluation dataset. IA³ adapters also improved performance relative to several prompting configurations, although they did not match the performance achieved by LoRA. These findings support the hypothesis that lightweight parameter updates can significantly improve the consistency of structured outputs while requiring only a small fraction of trainable parameters.
+Despite the strong performance of prompt engineering methods, the results show that PEFT can further enhance reliability and accuracy. In particular, LoRA-based adapters achieved near-perfect results across all tested models, with the best configuration reaching a perfect exact match score on the evaluation dataset. IA$^3$ adapters also improved performance relative to several prompting configurations, although they did not match the performance achieved by LoRA. These findings support the hypothesis that lightweight parameter updates can significantly improve the consistency of structured outputs while requiring only a small fraction of trainable parameters.
 
 Another notable observation is that parameter-efficient tuning can reduce the performance gap between models of different sizes. The smaller Llama 3.2 3B model, when adapted using LoRA, achieved performance comparable to larger models using prompt-based methods alone. This suggests that PEFT techniques can enable smaller models to achieve competitive results, which is particularly relevant for deployment scenarios with limited computational resources.
 
-Overall, the findings highlight that while prompt engineering remains a flexible and low-cost approach for adapting LLMs, parameter-efficient fine-tuning provides superior reliability when deterministic structured outputs are required. In applications where strict output formatting and high accuracy are critical, such as information extraction, automated data processing, or API-driven systems, adapter-based methods represent a practical and scalable solution.
+Overall, the findings highlight that while prompt engineering remains a flexible and low-cost approach for adapting LLMs, PEFT provides superior reliability when deterministic structured outputs are required. In applications where strict output formatting and high accuracy are critical, such as information extraction, automated data processing, or API-driven systems, adapter-based methods represent a practical and scalable solution.
 
-Future research may explore the generalizability of these findings across more complex structured prediction tasks, larger datasets, and additional adapter architectures. Further investigation into robustness under noisy inputs, multilingual scenarios, and real-world deployment constraints could also provide valuable insights into the practical trade-offs between prompting and parameter-efficient fine-tuning.
+Future research may explore the generalizability of these findings across more complex structured prediction tasks, larger datasets, and additional adapter architectures. Further investigation into robustness under noisy inputs, multilingual scenarios, and real-world deployment constraints could also provide valuable insights into the practical trade-offs between prompting and PEFT.
 
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Patents}
-
-This section is not mandatory, but may be added if there are patents resulting from the work reported in this manuscript.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vspace{6pt} 
@@ -660,37 +710,12 @@ NLP & Natural Language Processing\\
 PEFT & Parameter-Efficient Fine-Tuning\\
 LoRA & Low-Rank Adaptation\\
 % QLoRA & Quantized Low-Rank Adaptation\\
-IA³ & Infused Adapter by Inhibiting and Amplifying Inner Activations\\
+IA$^3$ & Infused Adapter by Inhibiting and Amplifying Inner Activations\\
 DDP & Distributed Data Parallel\\
 ICL & In-Context Learning\\
 
 \end{tabular}
 }
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Optional
-\appendixtitles{no} % Leave argument "no" if all appendix headings stay EMPTY (then no dot is printed after "Appendix A"). If the appendix sections contain a heading then change the argument to "yes".
-\appendixstart
-\appendix
-\section[\appendixname~\thesection]{}
-\subsection[\appendixname~\thesubsection]{}
-The appendix is an optional section that can contain details and data supplemental to the main text---for example, explanations of experimental details that would disrupt the flow of the main text but nonetheless remain crucial to understanding and reproducing the research shown; figures of replicates for experiments of which representative data are shown in the main text can be added here if brief, or as Supplementary Data. Mathematical proofs of results not central to the paper can be added as an appendix.
-
-\begin{table}[H] 
-\caption{This is a table caption.\label{tab5}}
-%\newcolumntype{C}{>{\centering\arraybackslash}X}
-\begin{tabularx}{\textwidth}{CCC}
-\toprule
-\textbf{Title 1}	& \textbf{Title 2}	& \textbf{Title 3}\\
-\midrule
-Entry 1		& Data			& Data\\
-Entry 2		& Data			& Data\\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\section[\appendixname~\thesection]{}
-All appendix sections must be cited in the main text. In the appendices, Figures, Tables, etc. should be labeled, starting with ``A''---e.g., Figure A1, Figure A2, etc.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\isPreprints{}{% This command is only used for ``preprints''.
