@@ -417,7 +417,7 @@ The specific LoRA configuration utilized during fine-tuning included:
     
     \item Dropout: $0.05$, applied to the adapter layers as a regularization measure to mitigate overfitting.
     
-    \item Precision and Compute: Training was performed without 4-bit quantization, utilizing BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations supported by NVIDIA A100 GPUs to accelerate matrix multiplications.
+    \item Precision and Compute: Training was executed on the SUPEK supercomputer, provided by the University Computing Centre (SRCE) of the CARNET infrastructure. This high-performance computing environment utilized NVIDIA A100 GPUs to support BFloat16 (\texttt{bf16}) mixed precision and TensorFloat-32 (\texttt{tf32}) optimizations, enabling accelerated matrix multiplications without the necessity for 4-bit quantization.
 \end{itemize}
 
 \subsection{Infused Adapter by Inhibiting and Amplifying Inner Activations (IA$^3$)}
