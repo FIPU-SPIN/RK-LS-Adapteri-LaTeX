@@ -179,8 +179,8 @@ The expected contribution is a clear, empirical framework for deciding when fine
 
 The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
 A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
-To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using the LLaMA-3-8B model. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA and its quantized variant (QLoRA) to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
-The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking LLaMA-3 on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
+To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using multiple models. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
+The main aim of this research is to identify the "break-even point" where the computational investment of training adapters yields a statistically significant advantage over advanced prompting. The main contribution of this study is a structured empirical framework for benchmarking multiple models on structured parsing tasks, providing evidence-based insights into whether the resource consumption of fine-tuning is justified by gains in accuracy and robustness. The evaluation reveals that while prompting is sufficient for simple intents, adapter-based methods significantly outperform in handling complex, multi-intent schemas, particularly when targeting all linear layers with optimized hyperparameters.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Works}
@@ -235,7 +235,7 @@ Based on the cumulative evidence from these studies, the overarching goal of thi
 
 \section{Methodology}
 
-This section describes the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL) for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of large language models (LLMs) when converting unstructured natural language instructions into strictly formatted JSON objects. The methodology extends the comparative benchmarking approach of \citep{karlovic2025large} to a controlled structured parsing domain.
+This section describes the experimental framework designed to evaluate the trade-offs between parameter-efficient fine-tuning (PEFT) and advanced in-context learning (ICL) for structured information extraction. The primary objective is to measure performance, structural reliability, and generalization capability of large language models (LLMs) when converting unstructured natural language instructions into strictly formatted JSON objects. This methodology adapts the comparative benchmarking framework established by \citep{karlovic2025large} and applies its evaluative principles to the specific challenges of a controlled structured parsing domain.
 
 \subsection{Task Definition}
 
@@ -249,9 +249,7 @@ The experimental task focuses on Natural Language to Structured Command conversi
 }
 \end{verbatim}
 
-Each instance requires extraction or inference of three attributes:
-
-The experimental task focuses on the "Natural Language to Structured Command" conversion, a critical component in automated inventory and e-commerce systems. To rigorously evaluate the effectiveness of both prompting and adapter-based fine-tuning, we constructed a controlled dataset comprising 10,000 annotated natural-language shopping instructions. To ensure high-quality and diverse data, samples were synthetically generated using a teacher-model paradigm.
+The experimental task focuses on the "Natural Language to Structured Command" conversion, a critical component in automated inventory and e-commerce systems. To rigorously evaluate the effectiveness of both prompting and adapter-based fine-tuning, we constructed a controlled dataset comprising 12,000 annotated natural-language shopping instructions. To ensure high-quality and diverse data, samples were synthetically generated using a teacher-model paradigm.
 
 Each instance requires the model to extract or infer three specific attributes and map them deterministically to a fixed JSON schema:
 \begin{enumerate}
@@ -269,7 +267,7 @@ The dataset consists of 12,000 synthetically generated but linguistically divers
 Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization. Diversity mechanisms include:
 
 \subsubsection{Dataset Splitting for Generalization Assessment}
-To balance computational feasibility with sufficient diversity for adapter specialization, the 10,000 examples were partitioned into three disjoint subsets:
+To balance computational feasibility with sufficient diversity for adapter specialization, the 12,000 examples were partitioned into three disjoint subsets:
 \begin{itemize}
     \item Verb paraphrasing (e.g., add, insert, remove, delete, take out)
     \item Explicit and implicit quantity expressions
@@ -373,11 +371,7 @@ For the fine-tuning paradigm, we employed Low-Rank Adaptation (LoRA). This techn
 
 The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
 
-\begin{equation}
-    h = W_0 x + \left(\frac{\alpha}{r}\right) \Delta W x = W_0 x + \left(\frac{\alpha}{r}\right) BAx
-\end{equation}
-
-In this study, we targeted all linear modules within the transformer architecture to ensure that the adapter captured the structural and semantic constraints required for reliable JSON generation. The adaptation was applied to both the attention mechanism and the feed-forward network layers, specifically:
+In this study, we targeted all linear modules within the transformer architecture to ensure that the adapter captured the structural and semantic constraints required for reliable JSON generation. The adaptation was applied to both the attention mechanism and the feed-forward network layers, specifically\cite{hu2022lora}:
 
 \begin{itemize}
     \item \texttt{q\_proj} – Query projection layer that generates query vectors used to compute attention scores between tokens.
@@ -417,7 +411,7 @@ While most fine-tuning methods focus on adding new structural layers or modifyin
 The IA3 method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
 
 \begin{itemize}
-    \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence[cite:   ]. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
+    \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output.
     \item Feed-Forward Modulator ($l_{ff}$): This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart.
 \end{itemize}
 
@@ -453,7 +447,7 @@ The models were evaluated on two primary dimensions to assess both syntactic int
 Before measuring accuracy, we assess if the output is a "well-formed" JSON object. Any output that includes conversational filler, markdown errors, or fails standard library parsing (e.g., Python's \texttt{json.loads()}) is categorized as a failure. This metric directly evaluates the model's susceptibility to structural hallucination.
 
 \subsubsection{Structured F1 Score}
-For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$):
+For all valid JSON outputs, we calculate the F1 score. This requires an exact match between the predicted value and the ground truth for each of the three fields (Action, Product, Quantity). The field-level F1 score is defined as the harmonic mean of precision ($P$) and recall ($R$) \cite{wang2024adaptable}:
 
 \begin{equation}
     F_1 = 2 \cdot \frac{P \cdot R}{P + R}

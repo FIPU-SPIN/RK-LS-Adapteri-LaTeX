@@ -218,3 +218,31 @@
       primaryClass={cs.LG},
       url={https://arxiv.org/abs/2205.05638}, 
 }
+
+@inproceedings{10.1145/3583780.3614904,
+author = {Chen, Yuyan and Fu, Qiang and Fan, Ge and Du, Lun and Lou, Jian-Guang and Han, Shi and Zhang, Dongmei and Li, Zhixu and Xiao, Yanghua},
+title = {Hadamard Adapter: An Extreme Parameter-Efficient Adapter Tuning Method for Pre-trained Language Models},
+year = {2023},
+isbn = {9798400701245},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/3583780.3614904},
+doi = {10.1145/3583780.3614904},
+abstract = {Recent years, Pre-trained Language models (PLMs) have swept into various fields of artificial intelligence and achieved great success. However, most PLMs, such as T5 and GPT3, have a huge amount of parameters, fine-tuning them is often expensive and time consuming, and storing them takes up a lot of space. Therefore, it is necessary to adopt a parameter-efficient approach to reduce parameters of PLMs in fine-tuning without compromising their performance in downstream tasks. In this paper, we design a novel adapter which only acts on self-attention outputs in PLMs. This adapter adopts element-wise linear transformation using Hadamard product, hence named as Hadamard adapter, requires the fewest parameters compared to previous parameter-efficient adapters. In addition, we also summarize some tuning patterns for Hadamard adapter shared by various downstream tasks, expecting to provide some guidance for further parameter reduction with shared adapters in future studies. The experiments conducted on the widely-used GLUE benchmark with several SOTA PLMs prove that the Hadamard adapter achieves competitive performance with only 0.033\% parameters compared with full fine-tuning, and it has the fewest parameters compared with other adapters. Moreover, we further find that there is also some redundant layers in the Hadamard adapter which can be removed to achieve more parameter efficiency with only 0.022\% parameters.},
+booktitle = {Proceedings of the 32nd ACM International Conference on Information and Knowledge Management},
+pages = {276–285},
+numpages = {10},
+keywords = {pre-trained language models, parameter-efficient, adapter tuning},
+location = {Birmingham, United Kingdom},
+series = {CIKM '23}
+}
+
+@article{hu2022lora,
+  title={Lora: Low-rank adaptation of large language models.},
+  author={Hu, Edward J and Shen, Yelong and Wallis, Phillip and Allen-Zhu, Zeyuan and Li, Yuanzhi and Wang, Shean and Wang, Liang and Chen, Weizhu and others},
+  journal={Iclr},
+  volume={1},
+  number={2},
+  pages={3},
+  year={2022}
+}
