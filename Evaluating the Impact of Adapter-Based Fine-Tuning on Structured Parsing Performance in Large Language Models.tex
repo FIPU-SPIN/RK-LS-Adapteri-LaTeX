@@ -185,11 +185,11 @@ The main aim of this research is to identify the "break-even point" where the co
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Works}
 
-The rapid growth of large language models (LLMs) has necessitated strategies for adapting them efficiently to downstream tasks. Zhiqiang Hu et al. \citep{hu2023llm} introduced LLM-Adapters, a framework for parameter-efficient fine-tuning (PEFT) that integrates Series adapters, Parallel adapters, Prefix-Tuning, and LoRA. Their study demonstrated that smaller LLaMA models (7B and 13B) equipped with optimized adapters could match or surpass the performance of much larger models such as ChatGPT and GPT-3.5, particularly on structured reasoning tasks using datasets like Math10K and Commonsense170K. These findings suggest that adapter-based PEFT can improve structured task accuracy compared to advanced prompting strategies.
+The rapid growth of LLMs has necessitated strategies for adapting them efficiently to downstream tasks. Zhiqiang Hu et al. \citep{hu2023llm} introduced LLM-Adapters, a framework for PEFT that integrates Series adapters, Parallel adapters, Prefix-Tuning, and LoRA. Their study demonstrated that smaller LLaMA models (7B and 13B) equipped with optimized adapters could match or surpass the performance of much larger models such as ChatGPT and GPT-3.5, particularly on structured reasoning tasks using datasets like Math10K and Commonsense170K. These findings suggest that adapter-based PEFT can improve structured task accuracy compared to advanced prompting strategies.
 
 Ding et al. \citep{ding2023parameter} proposed a unified framework called delta-tuning, which adjusts only a small fraction of model parameters. Through extensive evaluation on over 100 NLP tasks, they found that delta-tuning achieved performance comparable to full fine-tuning while significantly reducing GPU memory usage and accelerating backpropagation. Larger models not only benefited more from minimal parameter updates but also converged faster, reinforcing the potential of adapter-based methods to enhance task-specific performance efficiently.
 
-Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and IA3. Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
+Esmaeili et al. \citep{esmaeili2026empirical} conducted empirical studies on PEFT for code-specific LLMs, examining LoRA, Compacter, and Infused Adapter by Inhibiting and Amplifying Inner Activations (IA3). Their findings showed that LoRA consistently outperformed other adapters in code summarization and generation, occasionally exceeding full fine-tuning on low-resource languages like R. The study highlighted that the number of trainable parameters influenced functional correctness more than the adapter architecture itself, further supporting the effectiveness of PEFT in improving structured outputs in specialized domains.
 
 Razuvayevskaya et al. \citep{razuvayevskaya2024comparison} compared parameter-efficient techniques and full fine-tuning for multilingual news classification. Using XLM-RoBERTa Large, they showed that LoRA and bottleneck adapters could reduce trainable parameters by 140–280 times while maintaining competitive accuracy. Their results suggested that PEFT strategies can outperform traditional prompting approaches, especially when sufficient source data is available.
 
@@ -503,14 +503,14 @@ Among the tested approaches, minimal instruction prompting demonstrated the best
 
 The extended prompt configuration, which provides additional instructions and constraints, produced an average F1 score of 0.983. While slightly higher in average performance, the improvement over minimal prompts was marginal. This indicates that once models clearly understand the task structure, additional prompt elaboration offers limited gains.
 
-Few-shot prompting showed the lowest overall performance, with an average F1 score of 0.972 and the lowest variability (standard deviation of 0.002). This suggests that while few-shot examples provide consistent guidance across models, they do not necessarily improve peak performance for this specific task. One possible explanation is that the task—mapping natural language input into a fixed JSON schema—is already well-aligned with the pretraining objectives of modern LLMs.
+Few-shot prompting showed the lowest overall performance, with an average F1 score of 0.972 and the lowest variability (standard deviation of 0.002). This suggests that while few-shot examples provide consistent guidance across models, they do not necessarily improve peak performance for this specific task. One possible explanation is that the task-mapping natural language input into a fixed JSON schema is already well-aligned with the pretraining objectives of modern LLMs.
 
 An analysis of individual field performance further reveals that the product field was consistently the most challenging attribute to predict, particularly in the few-shot configuration, where its F1 score decreased to 0.949 for the best-performing model. In contrast, the action and quantity fields maintained near-perfect performance across most configurations.
 
 These results highlight that prompt complexity does not always correlate with improved performance, especially for tasks requiring deterministic structured outputs.
 
 \subsection{Performance of Parameter-Efficient Fine-Tuning Methods}
-To evaluate the effectiveness of parameter-efficient adaptation methods, two widely used techniques—IA³ and LoRA—were applied to the evaluated models.
+To evaluate the effectiveness of parameter-efficient adaptation methods, two widely used techniques IA³ and LoRA were applied to the evaluated models.
 
 The IA³ adapter achieved strong results, with F1 scores ranging from 0.960 to 0.988 across models. The best IA³ configuration was obtained using Llama 3.2 3B, which achieved an F1 score of 0.988 and exact match accuracy of 0.976. Interestingly, this result surpasses the performance of the same base model under all prompt-based configurations, indicating that lightweight parameter adaptation can significantly improve structured prediction capabilities.
 
@@ -525,7 +525,7 @@ A comparison between prompt-based strategies and parameter-efficient fine-tuning
 
 First, prompt-based approaches already achieve very strong baseline performance, with F1 scores exceeding 0.96 in all tested configurations. This confirms the strong in-context learning capabilities of modern LLMs.
 
-However, parameter-efficient fine-tuning—particularly LoRA—consistently outperformed prompt-based methods, achieving near-perfect results. This suggests that even lightweight model adaptation can significantly improve reliability in tasks requiring strictly formatted outputs.
+However, parameter-efficient fine-tuning particularly LoRA consistently outperformed prompt-based methods, achieving near-perfect results. This suggests that even lightweight model adaptation can significantly improve reliability in tasks requiring strictly formatted outputs.
 
 Another important observation concerns model size efficiency. The Llama 3.2 3B model with LoRA achieved performance comparable to or better than larger models using prompting alone. This finding indicates that parameter-efficient fine-tuning may enable smaller models to achieve competitive performance while significantly reducing computational costs.
 
@@ -578,7 +578,7 @@ Finally, additional research may investigate robustness and generalization prope
 
 \section{Conclusion}
 
-This study investigated the effectiveness of prompt engineering strategies and parameter-efficient fine-tuning (PEFT) methods for adapting large language models to structured output generation tasks. Specifically, the experiments evaluated multiple prompting configurations—minimal instruction prompting, extended prompting, and few-shot prompting—alongside two widely used adapter-based techniques, IA³ and LoRA. The evaluation was conducted using three open-source LLMs of varying sizes, assessing their ability to transform natural language inputs into a predefined JSON schema.
+This study investigated the effectiveness of prompt engineering strategies and PEFT methods for adapting large language models to structured output generation tasks. Specifically, the experiments evaluated multiple prompting configurations (minimal instruction prompting, extended prompting, and few-shot prompting) alongside two widely used adapter-based techniques, IA³ and LoRA. The evaluation was conducted using three open-source LLMs of varying sizes, assessing their ability to transform natural language inputs into a predefined JSON schema.
 
 The experimental results demonstrate that modern LLMs exhibit strong baseline performance in structured extraction tasks even without parameter updates. Prompt-based approaches consistently achieved high accuracy across all evaluated models, with exact match F1 scores exceeding 0.96. Among prompting strategies, minimal instruction prompts proved particularly effective, indicating that concise task descriptions are often sufficient for guiding structured generation.
 
@@ -661,10 +661,15 @@ The following abbreviations are used in this manuscript:
 
 \noindent 
 \begin{tabular}{@{}ll}
-MDPI & Multidisciplinary Digital Publishing Institute\\
-DOAJ & Directory of open access journals\\
-TLA & Three letter acronym\\
-LD & Linear dichroism
+LLMs & Large Language Models\\
+NLP & Natural Language Processing\\
+PEFT & Parameter-Efficient Fine-Tuning\\
+LoRA & Low-Rank Adaptation\\
+% QLoRA & Quantized Low-Rank Adaptation\\
+IA³ & Infused Adapter by Inhibiting and Amplifying Inner Activations\\
+DDP & Distributed Data Parallel\\
+ICL & In-Context Learning\\
+
 \end{tabular}
 }
 
