@@ -82,11 +82,12 @@
 % Author Orchid ID: enter ID or remove command
 \newcommand{\orcidauthorA}{0009-0004-4210-5756} % Add \orcidA{} behind the author's name
 \newcommand{\orcidauthorB}{0009-0002-1965-7822}%Luka
-% \newcommand{\orcidauthorC}{0009-0002-1965-7822}%Sandi
-% \newcommand{\orcidauthorC}{0009-0002-1965-7822}%Ivan
+\newcommand{\orcidauthorC}{0000-0002-3015-1024}%Sandi
+\newcommand{\orcidauthorD}{0000-0003-0323-2600}%Vedran
+\newcommand{\orcidauthorE}{0000-0002-5964-245X}%Ivan
 
 % Authors, for the paper (add full first names)
-\Author{Ratomir Karlović $^{1}$\orcidA{}, Luka Sever $^{1}$\orcidB{}, Sandi Baressi Šegota $^{1}$, Vedran Mrzljak$^{2}$ and Ivan Lorencin $^{1}$}
+\Author{Ratomir Karlović $^{1}$\orcidA{}, Luka Sever $^{1}$\orcidB{}, Sandi Baressi Šegota $^{1}$\orcidC{}, Vedran Mrzljak$^{2}$\orcidD{} and Ivan Lorencin $^{1}$\orcidE{}}
 
 %\longauthorlist{yes}
 
@@ -97,7 +98,7 @@
 
 % Affiliations / Addresses (Add [1] after \address if there is only one affiliation.)
 \address{%
-$^{1}$ \quad Faculty of Informatics, Juraj Dobrila University of Pula, Zagrebačka 30, 52100 Pula, Croatia;\\ ratomir.karlovic@unipu.hr (R.K.), luka.sever@unipu.hr (L.S.), sandi.baressi.segota@unipu.hr (S.B.Š.), ivan.lorencin@unipu.hr (I.L.)\\ \\ $^{2} \quad Faculty of Engineering Rijeka, University of Rijeka, Vukovarska 58, 51000 Rijeka, Croatia;
+$^{1}$ \quad Faculty of Informatics, Juraj Dobrila University of Pula, Zagrebačka 30, 52100 Pula, Croatia;\\ ratomir.karlovic@unipu.hr (R.K.), luka.sever@unipu.hr (L.S.), sandi.baressi.segota@unipu.hr (S.B.Š.), ivan.lorencin@unipu.hr (I.L.)\\ $^{2}$ \quad Faculty of Engineering Rijeka, University of Rijeka, Vukovarska 58, 51000 Rijeka, Croatia;
 }
 
 % Contact information of the corresponding author
@@ -376,7 +377,7 @@ For the fine-tuning paradigm, we employed LoRA. This technique was chosen for it
 
 The LoRA approach modifies the pre-trained weight matrices $W_0 \in \mathbb{R}^{d \times k}$ by adding a low-rank decomposition $BA$, where $B \in \mathbb{R}^{d \times r}$ and $A \in \mathbb{R}^{r \times k}$. During the forward pass, the output of the adapter is scaled by a factor of $\frac{\alpha}{r}$ to balance the retention of pre-trained information with the targeted domain adaptation. The forward pass for a given input $x$ is thus represented as:
 
-In this study, we targeted all linear modules within the transformer architecture to ensure that the adapter captured the structural and semantic constraints required for reliable JSON generation. The adaptation was applied to both the attention mechanism and the feed-forward network layers, specifically\cite{hu2022lora}:
+In this study, we targeted all linear modules within the transformer architecture to ensure that the adapter captured the structural and semantic constraints required for reliable JSON generation. The adaptation was applied to both the attention mechanism and the feed-forward network layers, specifically \cite{hu2022lora}:
 
 \begin{itemize}
     \item \texttt{q\_proj} – Query projection layer that generates query vectors used to compute attention scores between tokens.
@@ -408,7 +409,7 @@ The specific LoRA configuration utilized during fine-tuning included:
 
 \subsection{Infused Adapter by Inhibiting and Amplifying Inner Activations (IA$^3$)}
 
-While most fine-tuning methods focus on adding new structural layers or modifying a model's global weights, IA$^3$ adopts a minimalist approach by selectively inhibiting or amplifying existing internal signals. Instead of introducing heavy new components, IA$^3$ integrates three specific learnable vectors that act as signal modulators within the transformer's architecture\cite{liu2022fewshotparameterefficientfinetuningbetter}.
+While most fine-tuning methods focus on adding new structural layers or modifying a model's global weights, IA$^3$ adopts a minimalist approach by selectively inhibiting or amplifying existing internal signals. Instead of introducing heavy new components, IA$^3$ integrates three specific learnable vectors that act as signal modulators within the transformer's architecture \cite{liu2022fewshotparameterefficientfinetuningbetter}.
 
 
 
@@ -416,8 +417,8 @@ While most fine-tuning methods focus on adding new structural layers or modifyin
 The IA$^3$ method utilizes a mathematical operation known as a Hadamard product to precisely scale specific pieces of information as they flow through the system. The function of these adjustable modulators is divided into two primary roles:
 
 \begin{itemize}
-    \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output\cite{10920340}.
-    \item Feed-Forward Modulator ($l_{ff}$): This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart\cite{10920340}.
+    \item Attention Modulators ($l_k$ and $l_v$): These vectors enable the model to prioritize specific parts of an input sentence. For example, in a shopping-cart command, these modulators can amplify the signal of a product name like ``apples'' while suppressing irrelevant filler words that do not contribute to the final structured output \cite{10920340}.
+    \item Feed-Forward Modulator ($l_{ff}$): This vector modifies the signals within the model's memory center, specifically the feed-forward network. It assists the model in correctly categorizing the user's intent, such as distinguishing between an instruction to ``add'' an item or ``remove'' it from the digital cart \cite{10920340}.
 \end{itemize}
 
 \subsubsection{Key Advantages for Practical Deployment}
@@ -658,15 +659,11 @@ Future research may explore the generalizability of these findings across more c
 %}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\authorcontributions{Conceptualization, R.K.,  L.S. and S.B.Š.; methodology, L.S.; software, R.K.; validation, I.L. and S.B.Š.; formal analysis, R.K.; investigation, R.K. and L.S.; resources, R.K. and
-V.M.; data curation, R.K. and L.S.; writing—original draft preparation, R.K. and L.S.; writing—review
-and editing, S.B.Š., I.L., and V.M.; visualization, R.K.; supervision, S.B.Š. and I.L.; project administration,
-S.B.Š. and I.L.; funding acquisition, V.M. and I.L. All authors have read and agreed to the published
-version of the manuscript.}
+\authorcontributions{Conceptualization, R.K.,  L.S. and S.B.Š.; methodology, L.S.; software, R.K.; validation, I.L. and S.B.Š.; formal analysis, R.K.; investigation, R.K. and L.S.; resources, R.K. and V.M.; data curation, R.K. and L.S.; writing—original draft preparation, R.K. and L.S.; writing—review and editing, S.B.Š., I.L., and V.M.; visualization, R.K.; supervision, S.B.Š. and I.L.; project administration, S.B.Š. and I.L.; funding acquisition, V.M. and I.L. All authors have read and agreed to the published version of the manuscript.}
 
 \funding{This work was (partially) supported by the EC Digital Europe Programme EDIH Adria 2.0 (101256325); SPIN projects IP.1.1.03.0120, IP.1.1.03.0158 and IP.1.1.03.0039; and NextGenerationEU University grants: uniri-iz-25-6, uniri-iz-25-220, IIP\_010144, IIP\_010136}
 
-\dataavailability{Data are contained within the article.} 
+\dataavailability{The dataset used in this study was synthetically generated for the experiments and is described within the article.} 
 
 %\durcstatement{Current research is limited to the [please insert a specific academic field, e.g., XXX], which is beneficial [share benefits and/or primary use] and does not pose a threat to public health or national security. Authors acknowledge the dual-use potential of the research involving xxx and confirm that all necessary precautions have been taken to prevent potential misuse. As an ethical responsibility, authors strictly adhere to relevant national and international laws about DURC. Authors advocate for responsible deployment, ethical considerations, regulatory compliance, and transparent reporting to mitigate misuse risks and foster beneficial outcomes.}
 
@@ -699,7 +696,6 @@ LLMs & Large Language Models\\
 NLP & Natural Language Processing\\
 PEFT & Parameter-Efficient Fine-Tuning\\
 LoRA & Low-Rank Adaptation\\
-% QLoRA & Quantized Low-Rank Adaptation\\
 IA$^3$ & Infused Adapter by Inhibiting and Amplifying Inner Activations\\
 ICL & In-Context Learning\\
 JSON & JavaScript Object Notation\\
