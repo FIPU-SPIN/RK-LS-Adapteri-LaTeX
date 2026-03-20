@@ -471,21 +471,21 @@ This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B
 \toprule
 \textbf{Model}	& \textbf{Exact match accuracy}	 & \textbf{F1 Score} & \textbf{Macro-Averaged F1} & \textbf{JSON Validity Rate} & \textbf{Approach}\\
 \midrule
-Llama 3.1 8B		& 0.965			& 0.982			& 0.985			& 1.000			& Minimal Instruction Prompting\\
-Llama 3.2 3B		& 0.927			& 0.962  		& 0.983  		& 0.998  		& Minimal Instruction Prompting	\\
-Qwen3 4B		    & 0.992			& 0.996  		& 0.998  		& 1.000  		& Minimal Instruction Prompting	\\
-Llama 3.1 8B		& 0.971			& 0.985			& 0.990			& 1.000			& Extended Prompting\\
-Llama 3.2 3B		& 0.940			& 0.969  		& 0.984  		& 0.999  		& Extended Prompting	\\
-Qwen3 4B		    & 0.989			& 0.994  		& 0.997  		& 1.000  		& Extended Prompting	\\
-Llama 3.1 8B		& 0.944			& 0.971			& 0.988			& 1.000			& Few-Shot Prompting\\
-Llama 3.2 3B		& 0.942			& 0.970  		& 0.986  		& 1.000  		& Few-Shot Prompting	\\
-Qwen3 4B		    & 0.949			& 0.974  		& 0.989  		& 0.997  		& Few-Shot Prompting	\\
+Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 1.000			& Minimal Instruction Prompting\\
+Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 0.998  		& Minimal Instruction Prompting	\\
+Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 1.000  		& Minimal Instruction Prompting	\\
+Llama 3.1 8B		& 0.874			& 0.932			& 0.949			& 1.000			& Extended Prompting\\
+Llama 3.2 3B		& 0.691			& 0.817  		& 0.889  		& 0.999  		& Extended Prompting	\\
+Qwen3 4B		    & 0.908			& 0.952  		& 0.965  		& 1.000  		& Extended Prompting	\\
+Llama 3.1 8B		& 0.922			& 0.960			& 0.974			& 1.000			& Few-Shot Prompting\\
+Llama 3.2 3B		& 0.864			& 0.927  		& 0.958  		& 1.000  		& Few-Shot Prompting	\\
+Qwen3 4B		    & 0.963			& 0.981  		& 0.987  		& 0.997  		& Few-Shot Prompting	\\
 Llama 3.1 8B		& 1.000			& 1.000			& 1.000			& 1.000			& LoRA\\
 Llama 3.2 3B		& 0.999			& 0.999  		& 1.000  		& 1.000  		& LoRA	\\
 Qwen3 4B		    & 0.999			& 0.999  		& 0.999  		& 1.000  		& LoRA	\\
-Llama 3.1 8B		& 0.960			& 0.980			& 0.992			& 0.997			& IA$^3$\\
-Llama 3.2 3B		& 0.976			& 0.988  		& 0.996  		& 1.000  		& IA$^3$	\\
-Qwen3 4B		    & 0.923			& 0.960  		& 0.985  		& 1.000  		& IA$^3$	\\
+Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 0.997			& IA$^3$\\
+Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 1.000  		& IA$^3$	\\
+Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 1.000  		& IA$^3$	\\
 \bottomrule
 \end{tabularx}
 \end{table}
