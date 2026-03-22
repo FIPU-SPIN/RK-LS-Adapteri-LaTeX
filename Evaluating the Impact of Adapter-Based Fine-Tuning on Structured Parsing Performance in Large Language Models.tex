@@ -462,7 +462,7 @@ For all valid JSON outputs, we calculate the F1 Score. This requires an exact ma
 We report the macro-averaged F1 across all fields to provide a singular, robust measure of parsing performance.
 
 \section{Results and discussion}
-This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B, and Qwen3 4B under multiple adaptation strategies, including minimal instruction prompting, extended prompting, few-shot prompting, and PEFT methods (IA$^3$ and LoRA). The evaluation was conducted on a dataset of 2000 samples, with performance measured using Exact Match Accuracy, F1 Score, Macro-Averaged F1, and JSON Validity Rate for structured JSON output generation. Table~\ref{tab:overallresults}  summarizes the overall results across all evaluated approaches.
+This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B, and Qwen3 4B under multiple adaptation strategies, including minimal instruction prompting, extended prompting, few-shot prompting, and PEFT methods (IA$^3$ and LoRA). The evaluation was conducted on a dataset of 2000 samples, with performance measured using Exact Match Accuracy, F1 Score, Macro-Averaged F1, JSON Validity Rate for structured JSON output generation, and Average time per test. Table~\ref{tab:overallresults} summarizes the overall results across all evaluated approaches.
 \begin{table}[H] 
 %\small % Change table font size
 \caption{Overall results across all evaluated approaches\label{tab:overallresults}}
@@ -471,15 +471,15 @@ This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B
 \toprule
 \textbf{Model}	& \textbf{Exact match accuracy}	 & \textbf{F1 Score} & \textbf{Macro-Averaged F1}& \textbf{JSON Validity Rate} & \textbf{Average time per test} & \textbf{Approach}\\
 \midrule
-Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 1.000     & 1.68			& Minimal Instruction Prompting\\
-Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 0.998     & 1.2397  		& Minimal Instruction Prompting	\\
-Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 1.000     & 21.1431  		& Minimal Instruction Prompting	\\
+Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 0.999     & 1.68			& Minimal Instruction Prompting\\
+Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 0.9945    & 1.2397  		& Minimal Instruction Prompting	\\
+Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 0.995     & 21.1431  		& Minimal Instruction Prompting	\\
 Llama 3.1 8B		& 0.874			& 0.932			& 0.949			& 1.000     & 1.7036		& Extended Prompting\\
-Llama 3.2 3B		& 0.691			& 0.817  		& 0.889  		& 0.999     & 1.0425  		& Extended Prompting	\\
-Qwen3 4B		    & 0.908			& 0.952  		& 0.965  		& 1.000     & 21.6727  		& Extended Prompting	\\
+Llama 3.2 3B		& 0.691			& 0.817  		& 0.889  		& 0.9975    & 1.0425  		& Extended Prompting	\\
+Qwen3 4B		    & 0.908			& 0.952  		& 0.965  		& 0.998     & 21.6727  		& Extended Prompting	\\
 Llama 3.1 8B		& 0.922			& 0.960			& 0.974			& 1.000     & 1.2096		& Few-Shot Prompting\\
 Llama 3.2 3B		& 0.864			& 0.927  		& 0.958  		& 1.000     & 0.7434  		& Few-Shot Prompting	\\
-Qwen3 4B		    & 0.963			& 0.981  		& 0.987  		& 0.997     & 18.4831  		& Few-Shot Prompting	\\
+Qwen3 4B		    & 0.963			& 0.981  		& 0.987  		& 0.9985    & 18.4831  		& Few-Shot Prompting	\\
 Llama 3.1 8B		& 1.000			& 1.000			& 1.000			& 1.000     & N/A			& LoRA\\
 Llama 3.2 3B		& 0.999			& 0.999  		& 1.000  		& 1.000     & N/A  		    & LoRA	\\
 Qwen3 4B		    & 0.999			& 0.999  		& 0.999  		& 1.000     & N/A  		    & LoRA	\\
@@ -490,7 +490,9 @@ Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 1.000     & 11.6342  		& IA$^3$	
 \end{tabularx}
 \end{table}
 
-The results indicate that all models achieve high performance across prompting-based approaches, with exact match F1 Scores consistently exceeding 0.96. Among prompting methods, the minimal instruction prompt produced the strongest overall performance, with the Qwen3 4B model achieving an F1 Score of 0.996 and an exact match accuracy of 0.992. A visual comparison of model performance under minimal instruction prompting is presented in Figure~\ref{fig:minimal_prompt_results}, which illustrates the F1 Score achieved by each evaluated model. This result suggests that, for tasks involving structured output generation, carefully designed but concise prompts may be sufficient to guide model behavior without requiring extensive contextual examples.
+The results show substantial variability across models and prompting strategies, reflecting the increased complexity of the evaluated dataset. For prompt-based approaches, F1 Scores range from 0.781 to 0.981, indicating that both model capacity and prompt design significantly influence performance.
+
+Under minimal instruction prompting, Qwen3 4B achieves the strongest performance (F1 Score 0.945; Exact Match Accuracy 0.895). Llama 3.1 8B achieves moderate performance (F1 Score 0.886), while Llama 3.2 3B performs notably worse (F1 Score 0.781), suggesting that smaller models are more sensitive to limited instruction. A visual comparison of model performance under minimal instruction prompting is presented in Figure~\ref{fig:minimal_prompt_results}.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/minimal_instruction_results.png}
@@ -498,55 +500,45 @@ The results indicate that all models achieve high performance across prompting-b
 \end{figure}
 
 
-Extended prompting also yielded strong results, with Qwen3 4B reaching an F1 Score of 0.994, slightly below the minimal prompt configuration. The F1 Score performance of the evaluated models under the extended prompting configuration is illustrated in Figure~\ref{fig:extended_results}, highlighting the small differences in model performance when additional instructional context is provided.
+Extended prompting improves performance across all models. Llama 3.1 8B increases to an F1 Score of 0.932, Qwen3 4B to 0.952, and Llama 3.2 3B to 0.817. These results indicate that additional task specification enhances performance, although gains remain model-dependent. The corresponding results are illustrated in Figure~\ref{fig:extended_results}.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/extended_results.png}
 \caption{F1 Score under Extended Prompting\label{fig:extended_results}}
 \end{figure}
 
-
-
-In contrast, the few-shot prompting approach resulted in slightly lower performance, with F1 Scores ranging between 0.970 and 0.974 across models. Figure~\ref{fig:fewshot_prompt_results} presents the F1 Score comparison for the few-shot prompting configuration across the evaluated models, illustrating the slightly lower peak performance relative to other prompting strategies.
+Few-shot prompting yields the best overall performance among prompting strategies. Qwen3 4B achieves an F1 Score of 0.981 and Exact Match Accuracy of 0.963, while Llama 3.1 8B and Llama 3.2 3B reach F1 Scores of 0.960 and 0.927, respectively. These results are shown in Figure~\ref{fig:fewshot_prompt_results}.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/few_shot_results.png}
 \caption{F1 Score under Few-Shot Prompting\label{fig:fewshot_prompt_results}}
 \end{figure}
 
+The observed improvements indicate that example-based conditioning is particularly effective in more complex settings, where explicit demonstrations help reduce ambiguity and improve alignment with the target schema.
 
-This decrease may indicate that introducing multiple examples increases prompt complexity and token length, which can occasionally introduce ambiguity or distract the model from the core instruction. 
-
-Across all prompt-based strategies, Qwen3 4B consistently achieved the highest performance, followed by Llama 3.1 8B and Llama 3.2 3B. This suggests that architectural differences and pretraining strategies can significantly influence the ability of models to follow structured output constraints.
+Across all prompt-based strategies, Qwen3 4B consistently achieves the highest performance, followed by Llama 3.1 8B and Llama 3.2 3B, highlighting the impact of model architecture and scale.
 
 \subsection{Impact of Prompt Engineering Strategies}
-Prompt engineering strategies were evaluated to determine how different instruction styles influence structured output generation performance.
+Prompt engineering strategies were evaluated to assess their influence on structured output generation.
 
-Among the tested approaches, minimal instruction prompting demonstrated the best average performance, achieving an average F1 Score of 0.980 across models. The relatively high standard deviation (0.017) suggests that model size and architecture influence how effectively concise prompts are interpreted.
+Few-shot prompting achieves the highest performance across all models, followed by extended prompting, while minimal instruction prompting consistently performs worst. This ordering suggests that, for more complex inputs, providing structured examples is more effective than relying solely on concise instructions.
 
-The extended prompt configuration, which provides additional instructions and constraints, produced an average F1 Score of 0.983. While slightly higher in average performance, the improvement over minimal prompts was marginal. This indicates that once models clearly understand the task structure, additional prompt elaboration offers limited gains.
-
-Few-shot prompting showed the lowest overall performance, with an average F1 Score of 0.972 and the lowest variability (standard deviation of 0.002). This suggests that while few-shot examples provide consistent guidance across models, they do not necessarily improve peak performance for this specific task. One possible explanation is that the task of mapping natural language inputs into a fixed JSON schema is already well aligned with the pretraining objectives of modern LLMs.
-
-An analysis of individual field performance further reveals that the product field was consistently the most challenging attribute to predict, particularly in the few-shot configuration, where its F1 Score decreased to 0.949 for the best-performing model. In contrast, the action and quantity fields maintained near-perfect performance across most configurations.
-
-These results highlight that prompt complexity does not always correlate with improved performance, especially for tasks requiring deterministic structured outputs.
+Despite differences in semantic accuracy, JSON Validity Rate remains consistently high (typically above 0.99) across all configurations, indicating that models reliably generate syntactically valid outputs even when prediction errors occur.
 
 \subsection{Performance of Parameter-Efficient Fine-Tuning Methods}
-To evaluate the effectiveness of parameter-efficient adaptation methods, two widely used techniques, IA$^3$ and LoRA were applied to the evaluated models.
+To evaluate parameter-efficient adaptation, IA$^3$ and LoRA were applied to all models.
 
-The IA$^3$ adapter achieved strong results, with F1 Scores ranging from 0.960 to 0.988 across models. Figure~\ref{fig:ia3_results} illustrates the F1 Score performance of the evaluated models when using IA$^3$ adapters, providing a visual comparison with the prompt-based configurations discussed earlier.
+IA$^3$ produces results comparable to minimal instruction prompting. For example, Llama 3.1 8B and Llama 3.2 3B achieve identical F1 Scores to their minimal prompting configurations (0.886 and 0.781), while Qwen3 4B maintains an F1 Score of 0.945. These results are shown in Figure~\ref{fig:ia3_results}.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/ia3_results.png}
 \caption{F1 Score under IA$^3$ Adaptation\label{fig:ia3_results}}
 \end{figure}
 
-The best IA$^3$ configuration was obtained using Llama 3.2 3B, which achieved an F1 Score of 0.988 and exact match accuracy of 0.976. Interestingly, this result surpasses the performance of the same base model under all prompt-based configurations, indicating that lightweight parameter adaptation can significantly improve structured prediction capabilities.
+These findings suggest that, under the current configuration, IA$^3$ does not provide measurable improvements over prompt-based approaches.
 
-However, the most notable results were achieved using LoRA adapters, which produced near-perfect performance across all evaluated models. The Llama 3.1 8B LoRA configuration achieved a perfect score, with F1, precision, recall, and accuracy all equal to 1.000, successfully predicting all 2000 samples.
+In contrast, LoRA achieves near-perfect performance across all models. Llama 3.1 8B reaches an F1 Score of 1.000, while Llama 3.2 3B and Qwen3 4B achieve 0.999. The corresponding results are presented in Figure~\ref{fig:lora_results}.
 
-Similarly, Llama 3.2 3B and Qwen3 4B LoRA models achieved F1 Scores of 0.999, missing only two and three samples respectively. These results demonstrate the exceptional effectiveness of LoRA-based adaptation for structured generation tasks. The F1 Score results for the LoRA-adapted models are shown in Figure~\ref{fig:lora_results}, demonstrating the near-perfect performance achieved across all evaluated models.
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/lora_results.png}
@@ -556,15 +548,14 @@ Similarly, Llama 3.2 3B and Qwen3 4B LoRA models achieved F1 Scores of 0.999, mi
 The superiority of LoRA in this setting can be attributed to its ability to introduce low-rank trainable matrices into attention layers, enabling the model to learn task-specific patterns without modifying the majority of base model parameters. This allows the model to specialize for the target task while preserving most of the pretrained model parameters.
 
 \subsection{Comparison Between Prompt-Based and Adapter-Based Adaptation}
-A comparison between prompt-based strategies and PEFT methods reveals several important insights.
+Comparing prompt-based and adapter-based approaches reveals several key observations.
 
-First, prompt-based approaches already achieve very strong baseline performance, with F1 Scores exceeding 0.96 in all tested configurations. This confirms the strong ICL capabilities of modern LLMs.
+Prompt-based methods provide strong baseline performance, particularly with few-shot prompting. However, LoRA consistently achieves superior results, indicating that even lightweight fine-tuning can significantly improve reliability in structured generation tasks.
 
-However, PEFT, particularly LoRA consistently outperformed prompt-based methods, achieving near-perfect results. This suggests that even lightweight model adaptation can significantly improve reliability in tasks requiring strictly formatted outputs.
+Model size effects are also reduced under LoRA. The Llama 3.2 3B model achieves performance comparable to larger models when fine-tuned, suggesting that PEFT can mitigate differences in model scale.
 
-Another important observation concerns model size efficiency. The Llama 3.2 3B model with LoRA achieved performance comparable to or better than larger models using prompting alone. This finding indicates that PEFT may enable smaller models to achieve competitive performance while significantly reducing computational costs.
+From a practical perspective, the choice between approaches depends on deployment constraints:
 
-From a practical perspective, the choice between prompting and fine-tuning depends on several factors:
 \begin{table}[H] 
 %\small % Change table font size
 \caption{Overview of prompt-based and adapter-based adaptation methods\label{tab:comparisonpromptadapter}}
@@ -579,18 +570,32 @@ Flexible for multiple tasks		& Improved performance for structured prediction ta
 \end{tabularx}
 \end{table}
 
-Overall, while prompt engineering remains a powerful and flexible technique, adapter-based tuning provides superior consistency when deterministic outputs are required.
+Overall, prompt engineering provides a flexible baseline, while adapter-based tuning—particularly LoRA—offers improved consistency and accuracy.
+
+\subsection{Cost Efficiency and Inference Time Analysis}
+
+In addition to accuracy-based metrics, this study evaluates the computational efficiency of different adaptation strategies using the average inference time per test sample. This metric provides an approximation of the runtime cost associated with each approach during deployment.
+
+The results show notable differences in inference time across models and prompting strategies. Llama-based models demonstrate relatively low and consistent inference times, typically ranging between 0.7 and 1.7 seconds per sample across all prompting configurations. In contrast, Qwen3 4B exhibits significantly higher inference times, exceeding 18 seconds per sample in few-shot prompting and over 21 seconds in minimal and extended prompting configurations.
+
+This discrepancy can be attributed to differences in model architecture, implementation, or inference environment, and highlights that higher accuracy does not necessarily correspond to lower computational cost.
+
+Prompt complexity also has a measurable impact on inference time. Few-shot prompting generally results in lower or comparable inference times for Llama models due to shorter or more efficient prompt structures, while for Qwen3 4B the effect remains less pronounced, with consistently high latency across configurations. This suggests that the relationship between prompt length and inference time may depend on model-specific optimization characteristics.
+
+For adapter-based methods, inference time measurements are not available for LoRA configurations due to differences in evaluation setup. However, IA$^3$ results indicate similar or slightly reduced inference times compared to prompting approaches, suggesting that lightweight adapters do not introduce significant runtime overhead during inference.
+
+From a practical perspective, these findings highlight an important trade-off between accuracy and computational efficiency. While models such as Qwen3 4B achieve the highest performance across most configurations, they also incur substantially higher inference costs. In contrast, smaller models such as Llama 3.2 3B provide faster responses but at the cost of reduced accuracy.
+
+These observations suggest that the selection of adaptation strategy and model should consider both performance and latency requirements. In real-world applications where response time is critical, prompt-based approaches with smaller models may offer a more suitable balance, whereas adapter-based methods may be preferred in scenarios where output reliability is prioritized over inference speed.
 
 \subsection{Variability Across Models}
-The evaluation also reveals differences in how models respond to adaptation strategies.
+The evaluation reveals consistent differences in model behavior.
 
-Qwen3 4B consistently performed best in prompt-based scenarios, suggesting strong instruction-following capabilities and robust ICL performance.
+Qwen3 4B achieves the best performance across prompt-based approaches, indicating strong instruction-following capabilities. Llama models show greater sensitivity to prompt design but benefit more from advanced prompting and fine-tuning.
 
-In contrast, the Llama models benefited more from PEFT, particularly with LoRA. This observation may reflect differences in pretraining data composition, tokenizer design, or alignment procedures between the evaluated model families.
+Performance differences between 3B and 8B models are evident under prompting but diminish after adaptation, suggesting that task-specific tuning can reduce the impact of model scale.
 
-Furthermore, performance differences between 3B and 8B parameter models were relatively small, especially after adapter-based tuning. This suggests that task-specific adaptation can compensate for differences in model scale, an important consideration for deployment scenarios with limited computational resources.
-
-These findings suggest that organizations deploying LLM based information extraction systems can achieve high accuracy using prompt-based approaches, while PEFT offers improved reliability when deterministic structured outputs are required.
+Overall, both model architecture and adaptation strategy significantly influence structured output generation performance.
 
 \section{Limitations and Future Work}
 Although the experimental results demonstrate the effectiveness of both prompt engineering and PEFT for structured output generation, several limitations of the study should be acknowledged.
