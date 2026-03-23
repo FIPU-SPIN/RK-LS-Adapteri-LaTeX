@@ -461,6 +461,10 @@ For all valid JSON outputs, we calculate the F1 Score. This requires an exact ma
 
 We report the macro-averaged F1 across all fields to provide a singular, robust measure of parsing performance.
 
+\subsubsection{Average Time per Test}
+
+To evaluate the practical deployment suitability of each adaptation strategy, we measure the Average Time per Test. This metric represents the computational efficiency and runtime cost associated with each approach during the inference phase. By recording the average duration (in seconds) required to process a single sample, we can quantify the trade-off between the high accuracy of complex prompting and the potential speed advantages of lightweight adapters.
+
 \section{Results and discussion}
 This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B, and Qwen3 4B under multiple adaptation strategies, including minimal instruction prompting, extended prompting, few-shot prompting, and PEFT methods (IA$^3$ and LoRA). The evaluation was conducted on a dataset of 2000 samples, with performance measured using Exact Match Accuracy, F1 Score, Macro-Averaged F1, JSON Validity Rate for structured JSON output generation, and Average time per test. Table~\ref{tab:overallresults} summarizes the overall results across all evaluated approaches.
 \begin{table}[H] 
