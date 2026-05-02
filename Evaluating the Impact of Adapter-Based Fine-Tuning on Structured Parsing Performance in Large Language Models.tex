@@ -116,10 +116,9 @@ $^{1}$ \quad Faculty of Informatics, Juraj Dobrila University of Pula, Zagrebač
 %\conference{} % An extended version of a conference paper
 
 % Abstract (Do not insert blank lines, i.e. \\) 
-\abstract{Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods,such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
+\abstract{Recent advances in large language models (LLMs) highlight two dominant strategies for performance improvement: prompt engineering and fine-tuning. While prompt design can significantly influence model output, it remains uncertain whether lightweight fine-tuning methods, such as adapter-based training, offer meaningful advantages for structured, domain-specific tasks.
 This study builds on prior research comparing three prompting strategies for natural-language command parsing into JSON schemas. Expanding that framework, the current work investigates how adapter-based fine-tuning, where most model parameters are frozen and only small adapter modules are trained, affects model accuracy and consistency.
-The experiment uses the same controlled shopping-cart parsing task and dataset of 12,000 synthetic commands to ensure direct comparability. Results will quantify the trade-off between computational cost and performance gains, offering evidence-based insights into whether fine-tuning is a justified investment compared to advanced prompt engineering.
-The expected contribution is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.}
+The experiment uses the same controlled shopping-cart parsing task and dataset of 12,000 synthetic commands to ensure direct comparability. \textcolor{blue}{Results quantify the trade-off between computational cost and performance gains, offering evidence-based insights into whether fine-tuning is a justified investment compared to advanced prompt engineering. The contribution of this study is a clear, empirical framework for deciding when fine-tuning meaningfully enhances LLM utility in applied natural-language understanding.}}
 
 % Keywords
 \keyword{LLM; Adapters Fine-Tuning; Prompt Engineering; Natural Language Understanding; JSON Parsing; Structured Output; Model Performance} 
@@ -179,9 +178,12 @@ The expected contribution is a clear, empirical framework for deciding when fine
 \section{Introduction}
 
 The rapid evolution of Large Language Models (LLMs) has fundamentally transformed the landscape of Natural Language Processing (NLP), enabling advanced capabilities in reasoning, content generation, and semantic understanding \citep{ling2025domain}. While early applications focused primarily on open-ended text generation, modern production environments increasingly require LLMs to function as reliable semantic parsers capable of mapping unstructured user intent into rigorous, machine-readable formats such as JSON or SQL \citep{han2024parameter}. This capability is particularly critical in domain-specific applications, such as e-commerce controllers, where valid schema adherence is a prerequisite for system functionality.
+
 A primary challenge in deploying these systems is the "optimization dilemma": choosing between inference-time strategies and model training. As highlighted in our previous survey \citep{karlovic2025large}, while prompt engineering offers a lightweight "black-box" approach to adaptation, it often struggles with robustness when constrained to rigid schema definitions. Conversely, full-parameter fine-tuning yields high precision but incurs prohibitive computational costs and memory requirements \citep{mundra2024comprehensive}. To address this, Parameter-Efficient Fine-Tuning (PEFT) techniques, such as Low-Rank Adaptation (LoRA), have emerged as a middle ground, freezing pre-trained weights and injecting trainable rank-decomposition matrices to approximate full fine-tuning performance with a fraction of the resources \citep{hu2023llm}.
-To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, we implement a controlled experimental design using multiple models. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
-The main aim of this research is to examine the trade-offs between prompt engineering and PEFT when applied to structured parsing tasks. In particular, the study investigates how different adaptation strategies influence the ability of LLMs to generate accurate and valid structured outputs. The primary contribution of this work is a structured empirical evaluation framework for benchmarking multiple models and adaptation approaches on structured parsing tasks. The results provide practical insights into the relative effectiveness of prompting strategies and adapter-based methods, highlighting scenarios in which lightweight fine-tuning can offer measurable improvements in reliability compared to prompt-only configurations.
+
+To address these challenges, this study evaluates the cost-benefit ratio of fine-tuning against prompting for high-fidelity semantic parsing. Building upon the theoretical frameworks established in our prior work \citep{karlovic2025large}, \textcolor{blue}{which primarily provided a broad qualitative overview of LLM capabilities and adaptation methodologies, the specific novelty of this current research lies in conducting a targeted, empirical comparison. We move beyond theoretical discussions to directly quantify the performance and computational trade-offs of PEFT versus prompt engineering in a highly constrained generative environment.} We implement a controlled experimental design using multiple models. The system compares two distinct optimization paradigms: Advanced Prompt Engineering and Adapter-Based Fine-Tuning, utilizing LoRA to update the model's internal representations \citep{patil2025analyzing}. This setup allows for a direct comparison of how each method handles the rigorous constraints of mapping natural language commands to structured JSON outputs.
+
+The main aim of this research is to examine the trade-offs between prompt engineering and PEFT when applied to structured parsing tasks. In particular, the study investigates how different adaptation strategies influence the ability of LLMs to generate accurate and valid structured outputs. The primary contribution of this work is a structured empirical evaluation framework for benchmarking multiple models and adaptation approaches on structured parsing tasks. \textcolor{red}{It is crucial to emphasize that this framework is evaluated using a controlled, synthetic benchmark featuring a relatively simple, three-attribute JSON schema. While this design isolates the fundamental mechanisms of structured extraction from the unpredictable noise of real-world inputs—such as typos, multi-intent requests, and complex nested structures—it inherently limits immediate generalization to highly unstructured or out-of-distribution data. Consequently, the findings presented herein should be interpreted as foundational, comparative baselines rather than definitive performance guarantees for all real-world deployments.} Ultimately, the results provide practical insights into the relative effectiveness of prompting strategies and adapter-based methods, highlighting scenarios in which lightweight fine-tuning can offer measurable improvements in reliability compared to prompt-only configurations.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Background and Related Works}
@@ -219,6 +221,8 @@ Trad and Chehab \citep{trad2024prompt} studied phishing detection LLMs and found
 Pornprasit and Tantithamthavorn \citep{pornprasit2024fine} evaluated LLM-based code review, showing that fine-tuning GPT-3.5 achieved 73–74\% higher Exact Match rates than prompting approaches. Their study confirmed that adapter-based fine-tuning can deliver meaningful gains even with modest training data.
 
 Wang et al. \citep{wang2025cosmos} introduced COSMOS, a framework for predicting adaptation outcomes with minimal trials. Their results indicated that fine-tuning consistently outperformed in-context learning (ICL) in medium to high-cost scenarios, supporting the view that adapter PEFT justifies its resource investment by providing predictable and superior performance.
+
+\textcolor{blue}{While PEFT and prompt engineering focus on improving the internal reasoning and semantic extraction capabilities of a model, an alternative paradigm for structured output generation involves strict intervention during the decoding phase. Techniques such as schema-constrained decoding (frequently implemented as "JSON mode" in commercial APIs), grammar-based generation, and formal semantic parsing enforce structural validity by restricting the token vocabulary of the model at inference time to match a predefined schema or regular expression. Although these methods mathematically guarantee that the final output will be well-formed JSON, they do not inherently improve the ability of the model to correctly understand the input text or accurately extract the correct entities. Consequently, a model utilizing constrained decoding might produce perfectly formatted JSON that contains entirely incorrect data. For this reason, the present study isolates PEFT and prompt engineering as the primary comparison points for enhancing the underlying semantic accuracy and intent-mapping capabilities of LLMs, acknowledging that constrained decoding techniques could be applied orthogonally in production environments to serve as a final structural safeguard.}
 
 Based on the cumulative evidence from previous studies, the goal of this work is to examine how adapter-based PEFT compares with advanced prompting strategies for structured parsing tasks. In particular, the study explores how different adaptation approaches influence structured output accuracy and reliability when generating JSON-formatted outputs. Guided by prior literature, the following hypotheses are considered:
 
@@ -473,23 +477,23 @@ This section evaluates the performance of three LLMs: Llama 3.1 8B, Llama 3.2 3B
 %\isPreprints{\centering}{} % Only used for preprints
 \begin{tabularx}{\textwidth}{CCCCCCC}
 \toprule
-\textbf{Model}	& \textbf{Exact match accuracy}	 & \textbf{F1 Score} & \textbf{Macro-Averaged F1}& \textbf{JSON Validity Rate} & \textbf{Average time per test} & \textbf{Approach}\\
+\textbf{Model}  & \textbf{Exact match accuracy}  & \textbf{F1 Score} & \textbf{Macro-Averaged F1}& \textbf{JSON Validity Rate} & \textbf{Average time per test} & \textbf{Approach}\\
 \midrule
-Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 0.999     & 1.68			& Minimal Instruction Prompting \\
-Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 0.9945    & 1.2397  		& Minimal Instruction Prompting	\\
-Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 0.995     & 21.1431  		& Minimal Instruction Prompting	\\
-Llama 3.1 8B		& 0.874			& 0.932			& 0.949			& 1.000     & 1.7036		& Extended Prompting \\
-Llama 3.2 3B		& 0.691			& 0.817  		& 0.889  		& 0.9975    & 1.0425  		& Extended Prompting \\
-Qwen3 4B		    & 0.908			& 0.952  		& 0.965  		& 0.998     & 21.6727  		& Extended Prompting \\
-Llama 3.1 8B		& 0.922			& 0.960			& 0.974			& 1.000     & 1.2096		& Few-Shot Prompting \\
-Llama 3.2 3B		& 0.864			& 0.927  		& 0.958  		& 1.000     & 0.7434  		& Few-Shot Prompting \\
-Qwen3 4B		    & 0.963			& 0.981  		& 0.993  		& 0.9985    & 18.4831  		& Few-Shot Prompting \\
-Llama 3.1 8B		& 0.981			& 0.990			& 0.995			& 1.000     & 1.3842		& LoRA \\
-Llama 3.2 3B		& 0.985			& 0.992  		& 0.989  		& 1.000     & 1.1918        & LoRA \\
-Qwen3 4B		    & 0.968			& 0.984  		& 0.985  		& 1.000     & 2.1289	    & LoRA \\
-Llama 3.1 8B		& 0.796			& 0.886			& 0.921			& 0.997     & 1.5264	    & IA$^3$ \\
-Llama 3.2 3B		& 0.641			& 0.781  		& 0.879  		& 1.000     & 1.2222  		& IA$^3$ \\
-Qwen3 4B		    & 0.895			& 0.945  		& 0.957  		& 1.000     & 11.6342  		& IA$^3$ \\
+Llama 3.1 8B        & 0.796         & 0.886         & 0.921         & 0.999     & 1.68          & Minimal Instruction Prompting \\
+Llama 3.2 3B        & 0.641         & 0.781         & 0.879         & 0.9945    & 1.2397        & Minimal Instruction Prompting \\
+Qwen3 4B            & 0.895         & 0.945         & 0.957         & 0.995     & 21.1431       & Minimal Instruction Prompting \\
+Llama 3.1 8B        & 0.874         & 0.932         & 0.949         & 1.000     & 1.7036        & Extended Prompting \\
+Llama 3.2 3B        & 0.691         & 0.817         & 0.889         & 0.9975    & 1.0425        & Extended Prompting \\
+Qwen3 4B            & 0.908         & 0.952         & 0.965         & 0.998     & 21.6727       & Extended Prompting \\
+Llama 3.1 8B        & 0.922         & 0.960         & 0.974         & 1.000     & 1.2096        & Few-Shot Prompting \\
+Llama 3.2 3B        & 0.864         & 0.927         & 0.958         & 1.000     & 0.7434        & Few-Shot Prompting \\
+Qwen3 4B            & 0.963         & 0.981         & 0.993         & 0.9985    & 18.4831       & Few-Shot Prompting \\
+Llama 3.1 8B        & 0.981         & 0.990         & 0.995         & 1.000     & 1.3842        & LoRA \\
+Llama 3.2 3B        & 0.985         & 0.992         & 0.989         & 1.000     & 1.1918        & LoRA \\
+Qwen3 4B            & 0.968         & 0.984         & 0.985         & 1.000     & 2.1289        & LoRA \\
+Llama 3.1 8B        & 0.796         & 0.886         & 0.921         & 0.997     & 1.5264        & IA$^3$ \\
+Llama 3.2 3B        & 0.641         & 0.781         & 0.879         & 1.000     & 1.2222        & IA$^3$ \\
+Qwen3 4B            & 0.895         & 0.945         & 0.957         & 1.000     & 11.6342       & IA$^3$ \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -502,7 +506,6 @@ Under minimal instruction prompting, Qwen3 4B achieves the strongest performance
 \includegraphics[width=\textwidth]{figures/minimal_instruction_results.png}
 \caption{F1 Score under Minimal Instruction Prompting\label{fig:minimal_prompt_results}}
 \end{figure}
-
 
 Extended prompting improves performance across all models. Llama 3.1 8B increases to an F1 Score of 0.932, Qwen3 4B to 0.952, and Llama 3.2 3B to 0.817. These results indicate that additional task specification enhances performance, although gains remain model-dependent. The corresponding results are illustrated in Figure~\ref{fig:extended_results}.
 
@@ -539,10 +542,9 @@ IA$^3$ produces results comparable to minimal instruction prompting. For example
 \caption{F1 Score under IA$^3$ Adaptation\label{fig:ia3_results}}
 \end{figure}
 
-These findings suggest that, under the current configuration, IA$^3$ does not provide measurable improvements over prompt-based approaches.
+These findings suggest that, under the current configuration, IA$^3$ does not provide measurable improvements over prompt-based approaches. \textcolor{red}{The performance disparity between LoRA and IA$^3$ can be attributed to their underlying architectural mechanisms and parameter capacities. IA$^3$ operates by scaling inner activations through learned vectors, which drastically limits the number of trainable parameters (yielding adapter sizes of merely 1–2 MB). While this vector-based signal modulation is highly efficient, it likely lacks the expressive capacity necessary to learn the strict structural syntax and novel semantic mappings required for deterministic JSON generation. Conversely, LoRA introduces trainable rank-decomposition matrices into the self-attention mechanism, offering two orders of magnitude more trainable parameters (up to 320 MB). This increased capacity enables LoRA to effectively override the model's pre-trained probabilistic generation tendencies and strictly adhere to the target JSON schema.}
 
 In contrast, LoRA achieves consistently strong performance across all evaluated models, though not perfectly. Llama 3.2 3B achieves the highest performance with an F1 Score of 0.992 and Exact Match Accuracy of 0.985, followed closely by Llama 3.1 8B (F1 Score of 0.990, Exact Match Accuracy of 0.981). Qwen3 4B achieves slightly lower results (F1 Score of 0.984, Exact Match Accuracy of 0.968), but still maintains high overall performance. All LoRA configurations achieve a JSON Validity Rate of 1.000, indicating fully consistent output formatting. The corresponding results are presented in Figure~\ref{fig:lora_results}.
-
 
 \begin{figure}[H]
 \includegraphics[width=\textwidth]{figures/lora_results.png}
@@ -567,11 +569,11 @@ From a practical perspective, the choice between approaches depends on deploymen
 \caption{Overview of prompt-based and adapter-based adaptation methods\label{tab:comparisonpromptadapter}}
 \begin{tabularx}{\textwidth}{CC}
 \toprule
-\textbf{Prompt-based methods}	& \textbf{Adapter-based methods}\\
+\textbf{Prompt-based methods}   & \textbf{Adapter-based methods}\\
 \midrule
-No training required		& Higher reliability and accuracy \\
-Lower setup complexity		& Better control over output format \\
-Flexible for multiple tasks		& Improved performance for structured prediction tasks \\
+No training required        & Higher reliability and accuracy \\
+Lower setup complexity      & Better control over output format \\
+Flexible for multiple tasks     & Improved performance for structured prediction tasks \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -582,35 +584,33 @@ Overall, prompt engineering provides a flexible baseline, while adapter-based tu
 
 In addition to accuracy-based metrics, this study evaluates the computational efficiency of different adaptation strategies using the average inference time per test sample. This metric provides an approximation of the runtime cost associated with each approach during deployment.
 
-The results show notable differences in inference time across models and prompting strategies. Llama-based models demonstrate relatively low and consistent inference times, typically ranging between 0.7 and 1.7 seconds per sample across all prompting configurations. In contrast, Qwen3 4B exhibits significantly higher inference times, exceeding 18 seconds per sample in few-shot prompting and over 21 seconds in minimal and extended prompting configurations. This discrepancy highlights that higher predictive performance does not necessarily correspond to lower computational cost.
+The results show notable differences in inference time across models and prompting strategies. Llama-based models demonstrate relatively low and consistent inference times, typically ranging between 0.7 and 1.7 seconds per sample across all prompting configurations. In contrast, Qwen3 4B exhibits significantly higher inference times, exceeding 18 seconds per sample in few-shot prompting and over 21 seconds in minimal and extended prompting configurations. This discrepancy highlights that higher predictive performance does not necessarily correspond to lower computational cost. \textcolor{green}{The disproportionately high inference latency of Qwen3 4B (despite its smaller parameter count compared to Llama 3.1 8B) represents a notable anomaly. This behavior is likely driven by architectural implementation bottlenecks rather than pure model size. Potential contributing factors include an unoptimized inference kernel for the specific hardware stack utilized, inefficiencies during the tokenization of large structured outputs, or a larger vocabulary size that significantly increases the computational overhead of the final softmax layer during sequential decoding. Furthermore, Qwen3 4B might generate a higher number of underlying tokens to represent the same JSON string compared to Llama's tokenization scheme, inherently prolonging generation times.}
 
 Prompt complexity also has a measurable impact on inference time. Few-shot prompting results in comparable or slightly reduced latency for Llama models, while Qwen3 4B maintains consistently high inference times regardless of prompt design. This suggests that the relationship between prompt length and latency is model-dependent and influenced by underlying architectural and implementation factors.
 
-For adapter-based methods, inference time measurements were not available for LoRA configurations due to differences in the evaluation setup. However, IA$^3$ results indicate similar or slightly reduced inference times compared to prompting approaches, suggesting that lightweight adapters do not introduce significant runtime overhead during inference.
+\textcolor{red}{For adapter-based methods, both LoRA and IA$^3$ configurations yield inference times that are comparable to, or slightly lower than, those of the prompting approaches. This indicates that the addition of these lightweight adapter modules does not introduce any significant runtime overhead during inference.}
 
 Beyond inference cost, training efficiency and resource requirements must also be considered. As shown in Table~\ref{tab:comparisonadapterresources}, adapter training times range from approximately 5 to 16 minutes depending on the model and method. Although these durations appear modest, all experiments were conducted using high-performance hardware consisting of four NVIDIA A100-SXM4-40GB GPUs and 64 CPU cores. Attempts to train adapters on less capable hardware were unsuccessful, indicating that such configurations may not be feasible in resource-constrained environments.
-
-
 
 \begin{table}[H]  
 \caption{Resource and Training Cost Comparison of Adapter Methods\label{tab:comparisonadapterresources}}
 \begin{tabularx}{\textwidth}{CCCCC}
 \toprule
-\textbf{Adapter}	& \textbf{Adapter}	& \textbf{Training Time} & \textbf{Maximum GPU memory allocated} & \textbf{Adapter size}\\
+\textbf{Adapter}    & \textbf{Adapter}  & \textbf{Training Time} & \textbf{Maximum GPU memory allocated} & \textbf{Adapter size}\\
 \midrule
-Llama 3.1 8B	    & LoRA  		& 13m 41s & 17.7 GB & 320.06 MB\\
-Llama 3.2 3B		& LoRA	    	& 11m 28s & 17.7 GB & 185.55 MB\\
-Qwen3 4B			& LoRA		    & 16m 8s & 17.7 GB & 252.06 MB\\
-Llama 3.1 8B		& IA$^3$		& 6m 28s & 17.86 GB & 2.01 MB\\
-Llama 3.2 3B		& IA$^3$		& 5m 39s & 17.86 GB & 1.1 MB\\
-Qwen3 4B			& IA$^3$		& 7m 57s & 17.86 GB & 1.63 MB\\
+Llama 3.1 8B        & LoRA          & 13m 41s & 17.7 GB & 320.06 MB\\
+Llama 3.2 3B        & LoRA          & 11m 28s & 17.7 GB & 185.55 MB\\
+Qwen3 4B            & LoRA          & 16m 8s & 17.7 GB & 252.06 MB\\
+Llama 3.1 8B        & IA$^3$        & 6m 28s & 17.86 GB & 2.01 MB\\
+Llama 3.2 3B        & IA$^3$        & 5m 39s & 17.86 GB & 1.1 MB\\
+Qwen3 4B            & IA$^3$        & 7m 57s & 17.86 GB & 1.63 MB\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 The results further show that adapter size varies significantly across methods. IA$^3$ produces substantially smaller adapters (on the order of 1–2 MB), reflecting its higher parameter efficiency, whereas LoRA adapters are two orders of magnitude larger, reaching up to 320 MB. This difference is accompanied by longer training times for LoRA compared to IA$^3$, despite being trained on identical hardware.
 
-From a practical perspective, these findings highlight an important trade-off between accuracy, latency, and resource requirements. While LoRA consistently achieves the highest performance across evaluated models, it also requires significantly greater computational resources for training. In contrast, prompting-based approaches require no additional training and can be deployed on substantially less demanding hardware.
+From a practical perspective, these findings highlight an important trade-off between accuracy, latency, and resource requirements. While LoRA consistently achieves the highest performance across evaluated models, it also requires significantly greater computational resources for training. In contrast, prompting-based approaches require no additional training and can be deployed on substantially less demanding hardware. \textcolor{green}{However, it is essential to consider the long-term inference cost implications of prompt engineering at scale. While prompting incurs zero upfront training overhead, incorporating numerous contextual examples in few-shot scenarios significantly expands the input token length. In high-throughput environments, repeatedly computing attention across this extended context window for every user query leads to sustained compute costs and latency bottlenecks. In such cases, the one-time computational investment required to train a LoRA adapter can quickly amortize, resulting in a more computationally efficient system over time by allowing the base prompt to remain minimal.}
 
 Consequently, when high accuracy and output reliability are the primary objectives and sufficient computational resources are available, adapter-based methods are the preferred choice. Conversely, in scenarios with limited hardware availability or strict deployment constraints, prompt-based strategies offer a more accessible and cost-effective alternative.
 
@@ -629,7 +629,7 @@ Although the experimental results demonstrate the effectiveness of both prompt e
 
 First, the evaluation was conducted on a synthetic dataset consisting of 2000 samples with a relatively simple schema, containing only three output attributes (action, product, and quantity). While this controlled setup enables clear evaluation of structured extraction performance, it does not fully capture the complexity of real-world information extraction tasks. In practical applications, schemas are often significantly larger and may include hierarchical structures, optional fields, or ambiguous entities, which can introduce additional challenges for language models.
 
-Second, the study evaluates model performance using Exact Match Accuracy, F1 Score, Macro-Averaged F1, and JSON Validity Rate. These metrics effectively measure structured output correctness and formatting reliability, particularly for deterministic JSON generation tasks. However, other important evaluation aspects such as inference latency, memory consumption, and training time were not systematically analyzed. These factors may influence the practical selection of adaptation strategies in real-world deployments.
+Second, the study evaluates model performance using Exact Match Accuracy, F1 Score, Macro-Averaged F1, and JSON Validity Rate. These metrics effectively measure structured output correctness and formatting reliability, particularly for deterministic JSON generation tasks. \textcolor{red}{Although baseline computational metrics—such as inference latency, memory consumption, and training time—were documented, they were measured exclusively on a high-performance GPU cluster. A systematic profiling of these costs under dynamic load conditions or across diverse, resource-constrained hardware architectures was not conducted, even though such factors heavily influence the practical selection of adaptation strategies.}
 
 Another limitation concerns the hardware requirements associated with adapter-based fine-tuning. Although PEFT methods significantly reduce the number of trainable parameters compared to full fine-tuning, training adapters for modern LLMs still requires substantial computational resources, including GPUs with sufficient memory capacity. Hardware constraints can restrict the feasible configuration of training parameters such as batch size, learning rate schedules, adapter rank, and training duration. As a result, the final performance of adapter-based methods may vary depending on the available computational environment and the chosen hyperparameter configuration.
 
@@ -639,12 +639,11 @@ Finally, while the models achieved very high performance on the evaluated task, 
 
 Future work could extend this study in several directions. One promising avenue involves evaluating the proposed approaches on larger and more complex datasets, including real-world information extraction tasks with richer schemas and nested JSON structures. Such datasets would provide a more challenging benchmark for assessing the robustness and generalization capabilities of both prompting and adapter-based approaches.
 
-Another important direction is the systematic evaluation of computational efficiency and resource requirements, including training time, GPU memory usage, and inference latency. Incorporating these factors would provide a more comprehensive comparison between prompt-based adaptation and PEFT.
+\textcolor{red}{Another important direction is evaluating computational efficiency and resource requirements across different hardware tiers. While this study reports training time, GPU memory usage, and inference latency for a specific high-end configuration, future research could profile these factors on consumer-grade or edge devices to provide a more comprehensive cost-benefit comparison between prompt-based adaptation and PEFT in constrained environments.}
 
 Future studies could also explore hyperparameter sensitivity and optimization for adapter-based methods, analyzing how variations in adapter rank, learning rate, and training schedules influence performance. This would help identify stable configurations that provide consistent results across different hardware environments.
 
 Finally, additional research may investigate robustness and generalization properties, including performance under paraphrased inputs, noisy text, or multilingual settings. Understanding how adaptation strategies behave under such conditions would provide deeper insights into the practical deployment of LLM-based structured information extraction systems.
-
 
 \section{Conclusion}
 
@@ -659,6 +658,8 @@ In addition to accuracy, the results highlight important computational trade-off
 The findings also show that PEFT can reduce performance differences between models of varying sizes. Notably, the smaller Llama 3.2 3B model, when adapted using LoRA, achieved performance comparable to larger models using prompting alone. This suggests that parameter-efficient adaptation can be an effective strategy for improving smaller models in resource-constrained deployment scenarios.
 
 Overall, prompt engineering remains a flexible and low-cost approach that provides strong baseline performance without additional training. In contrast, adapter-based methods, particularly LoRA, offer superior accuracy and output consistency but introduce additional computational requirements during training. Consequently, the choice between prompting and PEFT should be guided by application-specific constraints, including accuracy requirements, latency tolerance, and available hardware resources, with no single approach universally optimal across all deployment scenarios.
+
+\textcolor{blue}{To synthesize these findings into a practical framework for deployment: prompt engineering (specifically few-shot prompting) should serve as the default strategy for rapid prototyping or scenarios where hardware is strictly limited, as it requires zero upfront training overhead. Conversely, for mission-critical production environments where strict schema adherence is paramount (e.g., automated API execution) and baseline GPU infrastructure is available for offline training, investing in LoRA-based fine-tuning is highly recommended. This approach maximizes output reliability, maintains predictable inference latencies, and enables practitioners to deploy smaller, more cost-effective base models without sacrificing accuracy.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \vspace{6pt} 
