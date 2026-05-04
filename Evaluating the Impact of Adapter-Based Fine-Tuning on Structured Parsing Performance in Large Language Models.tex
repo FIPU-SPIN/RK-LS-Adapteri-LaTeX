@@ -275,6 +275,19 @@ The dataset consists of 12,000 synthetically generated but linguistically divers
 
 Although synthetically produced, the corpus incorporates substantial variation to prevent surface-form memorization.
 
+\subsection{Dataset Generation}
+
+\textcolor{blue}{To ensure a robust evaluation of the adaptation strategies under diverse linguistic conditions, the experimental dataset was significantly expanded from a foundational set of 1,000 baseline samples used in our prior work. The dataset was scaled to 12,000 unique natural language commands using an automated data generation pipeline powered by state-of-the-art large language models, specifically Gemini 3.1 Pro and ChatGPT 5.2, acting as teacher models. These models were explicitly prompted to introduce high linguistic variance, incorporating a wide array of colloquialisms, novel paraphrasing patterns, and domain-specific slang terms. This synthetic expansion was crucial for simulating the noisy and unpredictable nature of real-world user requests, thereby providing a more rigorous testbed for the structured semantic parsing task.}
+
+\subsection{Model Configuration and Training Setup}
+
+\textcolor{blue}{The fine-tuning pipeline was strictly controlled to ensure reproducibility and optimal hardware utilization across both adapter methods. For the Low-Rank Adaptation (LoRA), the configuration was designed to maximize representational capacity across all attention and multi-layer perceptron (MLP) modules. The adaptation rank was set to $r=32$ with a scaling factor $\alpha=64$ and a dropout rate of 0.05. The target modules encompassed all primary projection matrices (\texttt{q\_proj}, \texttt{v\_proj}, \texttt{k\_proj}, \texttt{o\_proj}, \texttt{gate\_proj}, \texttt{up\_proj}, and \texttt{down\_proj}). LoRA training utilized a learning rate of $2 \times 10^{-4}$, a weight decay of 0.01, and enabled sequence packing with a per-device batch size of 8 and 4 gradient accumulation steps.}
+
+\textcolor{blue}{Conversely, the Infused Adapter by Inhibiting and Amplifying Inner Activations (IA$^3$) required a distinct optimization profile due to its reliance on scaling vectors rather than rank-decomposition matrices. For IA$^3$, the learning rate was increased to $1 \times 10^{-3}$ and weight decay was completely disabled ($0.0$). Sequence packing was explicitly disabled, and \texttt{ddp\_find\_unused\_parameters} was enabled alongside non-reentrant gradient checkpointing to prevent cross-contamination during Distributed Data Parallel (DDP) execution. The IA$^3$ per-device batch size was set to 4 with 2 gradient accumulation steps.}
+
+\textcolor{blue}{Despite these architectural differences, both adapters shared a robust baseline Supervised Fine-Tuning (SFT) framework optimized for NVIDIA A100 GPUs. Computations leveraged \texttt{bfloat16} precision and TensorFloat-32 (TF32) acceleration. The optimization process utilized a fused AdamW optimizer (\texttt{adamw\_torch\_fused}) with $\beta$ parameters of $(0.9, 0.999)$ and a maximum gradient norm of 1.0. The models were trained for three epochs with a warmup ratio of 0.03 to stabilize initial gradients. A maximum sequence length of 1024 tokens was strictly enforced across all configurations to maintain memory efficiency and maximize training throughput.}
+
+
 \subsubsection{Dataset Splitting for Generalization Assessment}
 To balance computational feasibility with sufficient diversity for adapter specialization, the 12,000 examples were partitioned into three disjoint subsets:
 \begin{itemize}
@@ -360,20 +373,21 @@ Adapters are implemented using the PEFT framework within the Hugging Face Transf
 
 Training is conducted using multi-GPU Distributed Data Parallel (DDP).
 
-\subsection{Evaluation Protocol}
+\subsection{Evaluation Protocol and Error Analysis}
 
-All configurations are evaluated on the same held-out test set of 2,000 examples.
+All configurations were evaluated on the same held-out test set of 2,000 examples. Performance was measured using Precision, Recall, and F1 Score under strict exact-match criteria, with the F1 Score serving as the primary comparison metric.
 
-A prediction is considered correct only if:
-
+A prediction was considered correct only if:
 \begin{itemize}
-    \item All three fields (action, quantity, product) exactly match the ground truth.
     \item The output is valid JSON and can be successfully parsed.
+    \item All three fields (action, quantity, product) exactly match the ground truth.
 \end{itemize}
 
-If the model fails to produce valid JSON, the prediction is counted as incorrect.
+If the model fails to produce valid JSON, the prediction is automatically counted as incorrect.
 
-Performance is measured using Precision, Recall, and F1 Score under strict exact-match criteria. F1 Score serves as the primary comparison metric.
+\textcolor{green}{To rigorously assess model performance and systematically categorize failure modes, these strict criteria were implemented via a two-stage automated evaluation pipeline. The first stage evaluated the syntactic robustness of the generated outputs. By processing the raw model responses through a standard JSON parser, the system verified that each output constituted a well-formed, structurally valid object. Responses containing syntax errors, unclosed brackets, or invalid string formats were immediately classified as structural failures.}
+
+\textcolor{green}{The second stage evaluated the semantic accuracy of the extracted entities. For all outputs that successfully passed the initial syntactic validation, the parsed key-value pairs were isolated. The corresponding attributes (specifically the designated action, extracted product item, and numerical quantity) were then compared against the ground-truth annotations in the dataset. A generation was classified as fully correct only if it achieved a deterministic match across all three schema fields. This strict evaluation protocol ensured that the models were penalized not only for formatting errors but also for subtle semantic hallucinations or extraction inaccuracies.}
 
 
 \subsection{Adapter-Based Fine-Tuning (LoRA)}
@@ -613,6 +627,18 @@ The results further show that adapter size varies significantly across methods. 
 From a practical perspective, these findings highlight an important trade-off between accuracy, latency, and resource requirements. While LoRA consistently achieves the highest performance across evaluated models, it also requires significantly greater computational resources for training. In contrast, prompting-based approaches require no additional training and can be deployed on substantially less demanding hardware. \textcolor{green}{However, it is essential to consider the long-term inference cost implications of prompt engineering at scale. While prompting incurs zero upfront training overhead, incorporating numerous contextual examples in few-shot scenarios significantly expands the input token length. In high-throughput environments, repeatedly computing attention across this extended context window for every user query leads to sustained compute costs and latency bottlenecks. In such cases, the one-time computational investment required to train a LoRA adapter can quickly amortize, resulting in a more computationally efficient system over time by allowing the base prompt to remain minimal.}
 
 Consequently, when high accuracy and output reliability are the primary objectives and sufficient computational resources are available, adapter-based methods are the preferred choice. Conversely, in scenarios with limited hardware availability or strict deployment constraints, prompt-based strategies offer a more accessible and cost-effective alternative.
+
+\subsection{Qualitative Error Analysis and Failure Modes}
+
+\textcolor{green}{To better understand the limitations of the adaptation strategies, a comprehensive qualitative error analysis was conducted on the failed predictions. Across all evaluated configurations, structural parsing proved to be highly robust. Pure syntactic failures (cases where the model failed to generate a valid, parsable JSON object) accounted for less than 0.7\% of all errors. This confirms that both advanced prompting and adapter-based fine-tuning effectively constrain the models to generate well-formed structural syntax. Consequently, the vast majority of errors (98.9\%) were semantic mismatches, where the generated JSON was valid but the extracted key-value pairs deviated from the ground-truth schema.}
+
+\textcolor{green}{The semantic mismatches were systematically categorized into two primary failure modes: action classification discrepancies and product normalization errors.}
+
+\textcolor{green}{Action Classification Discrepancies: The most prevalent source of error (accounting for over 250 isolated cases) stemmed from the models' inability to map highly variable, colloquial verbs to the rigid, standardized action vocabulary defined by the schema (e.g., mapping strictly to "add" or "remove"). Models frequently extracted the literal verbs present in the synthetic prompts, such as "grab," "put," "include," "delete," or "cancel", rather than translating them into the target categorical labels. Additionally, the analysis revealed instances of semantic flipping, where models predicted the opposite action (e.g., extracting "remove" instead of "add" for the colloquial phrase "I'll take"), as well as minor case-sensitivity infractions (generating "Add" instead of the strictly lowercase "add").}
+
+\textcolor{green}{Product Normalization Errors: The second major category of failure involved entity boundary detection and product normalization. A recurring pattern of over-extraction was observed, where models captured surrounding quantifier phrases alongside the target entity (e.g., extracting "packs of bread" or "packs of tissues" rather than the isolated terms "bread" and "tissues"). Furthermore, models struggled with the tokenization and spacing of compound words, frequently splitting merged dataset entities (such as "oliveoil," "sunfloweroil," or "brownsugar") into separate linguistic tokens (e.g., "olive oil"). Minor orthographic variations and misspellings (e.g., "rasberries" instead of "raspberries") also contributed to exact-match penalties.}
+
+\textcolor{green}{Ultimately, these failure modes highlight a critical challenge in structured semantic parsing: while current adaptation strategies easily master rigid formatting constraints, robustly mapping high-variance, out-of-distribution natural language directly to strict database schemas remains a persistent bottleneck. This validates the necessity of evaluating these models against highly diverse, colloquial datasets.}
 
 \subsection{Variability Across Models}
 The evaluation reveals consistent differences in model behavior.
