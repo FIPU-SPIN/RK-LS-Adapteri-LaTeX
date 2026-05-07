@@ -287,7 +287,7 @@ Although synthetically produced, the corpus incorporates substantial variation t
 
 \subsection{Dataset Generation}
 
-\textcolor{blue}{To ensure a robust evaluation of the adaptation strategies under diverse linguistic conditions, the experimental dataset was significantly expanded from a foundational set of 1,000 baseline samples used in our prior work. The dataset was scaled to 12,000 unique natural language commands using an automated data generation pipeline powered by state-of-the-art large language models, specifically Gemini 3.1 Pro and ChatGPT 5.2, acting as teacher models. These models were explicitly prompted to introduce high linguistic variance, incorporating a wide array of colloquialisms, novel paraphrasing patterns, and domain-specific slang terms. This synthetic expansion was crucial for simulating the noisy and unpredictable nature of real-world user requests, thereby providing a more rigorous testbed for the structured semantic parsing task.}
+\textcolor{blue}{To ensure a robust evaluation of the adaptation strategies under diverse linguistic conditions, the experimental dataset was significantly expanded from a foundational set of 1,000 baseline samples used in our prior work. The dataset was scaled to 12,000 unique natural language commands using an automated data generation pipeline powered by state-of-the-art large language models, specifically Gemini 3.1 Pro and ChatGPT 5.2, acting as teacher models. These models were explicitly prompted to introduce high linguistic variance, incorporating a wide array of colloquialisms, paraphrasing patterns, and domain-specific slang terms. This synthetic expansion was crucial for simulating the noisy and unpredictable nature of real-world user requests, thereby providing a more rigorous testbed for the structured semantic parsing task.}
 
 \subsection{Model Configuration and Training Setup}
 
@@ -302,7 +302,6 @@ Although synthetically produced, the corpus incorporates substantial variation t
 To balance computational feasibility with sufficient diversity for adapter specialization, the 12,000 examples were partitioned into three disjoint subsets:
 \begin{itemize}
     \item Verb paraphrasing (e.g., add, insert, remove, delete, take out)
-    % \item Explicit and implicit quantity expressions
     \item Variable grammatical constructions
     \item Multi-word paraphrases and lexical substitutions
 \end{itemize}
@@ -342,7 +341,7 @@ The corpus was partitioned as follows:
     \item Test set: 2,000 disjoint examples reserved exclusively for the final evaluation of model performance.
 \end{itemize}
 
-The validation and test sets remain completely unseen during adapter training. The test set additionally contains novel paraphrasing patterns and lexical combinations to evaluate the model’s ability to generalize beyond the training distribution.
+The validation and test sets remain completely unseen during adapter training. The test set additionally contains paraphrasing patterns and lexical combinations to evaluate the model’s ability to generalize beyond the training distribution.
 
 
 
@@ -566,7 +565,7 @@ IA$^3$ produces results comparable to minimal instruction prompting. For example
 \caption{F1 Score under IA$^3$ Adaptation\label{fig:ia3_results}}
 \end{figure}
 
-These findings suggest that, under the current configuration, IA$^3$ does not provide measurable improvements over prompt-based approaches. \textcolor{red}{The performance disparity between LoRA and IA$^3$ can be attributed to their underlying architectural mechanisms and parameter capacities. IA$^3$ operates by scaling inner activations through learned vectors, which drastically limits the number of trainable parameters (yielding adapter sizes of merely 1–2 MB). While this vector-based signal modulation is highly efficient, it likely lacks the expressive capacity necessary to learn the strict structural syntax and novel semantic mappings required for deterministic JSON generation. Conversely, LoRA introduces trainable rank-decomposition matrices into the self-attention mechanism, offering two orders of magnitude more trainable parameters (up to 320 MB). This increased capacity enables LoRA to effectively override the model's pre-trained probabilistic generation tendencies and strictly adhere to the target JSON schema.}
+These findings suggest that, under the current configuration, IA$^3$ does not provide measurable improvements over prompt-based approaches. \textcolor{red}{The performance disparity between LoRA and IA$^3$ can be attributed to their underlying architectural mechanisms and parameter capacities. IA$^3$ operates by scaling inner activations through learned vectors, which drastically limits the number of trainable parameters (yielding adapter sizes of merely 1–2 MB). While this vector-based signal modulation is highly efficient, it likely lacks the expressive capacity necessary to learn the strict structural syntax and semantic mappings required for deterministic JSON generation. Conversely, LoRA introduces trainable rank-decomposition matrices into the self-attention mechanism, offering two orders of magnitude more trainable parameters (up to 320 MB). This increased capacity enables LoRA to effectively override the model's pre-trained probabilistic generation tendencies and strictly adhere to the target JSON schema.}
 
 In contrast, LoRA achieves consistently strong performance across all evaluated models, though not perfectly. Llama 3.2 3B achieves the highest performance with an F1 Score of 0.992 and Exact Match Accuracy of 0.985, followed closely by Llama 3.1 8B (F1 Score of 0.990, Exact Match Accuracy of 0.981). Qwen3 4B achieves slightly lower results (F1 Score of 0.984, Exact Match Accuracy of 0.968), but still maintains high overall performance. All LoRA configurations achieve a JSON Validity Rate of 1.000, indicating fully consistent output formatting. The corresponding results are presented in Figure~\ref{fig:lora_results}.
 
