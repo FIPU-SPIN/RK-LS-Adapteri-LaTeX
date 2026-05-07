@@ -644,11 +644,29 @@ Consequently, when high accuracy and output reliability are the primary objectiv
 
 \textcolor{green}{To better understand the limitations of the adaptation strategies, a comprehensive qualitative error analysis was conducted on the failed predictions. Across all evaluated configurations, structural parsing proved to be highly robust. Pure syntactic failures (cases where the model failed to generate a valid, parsable JSON object) accounted for less than 0.7\% of all errors. This confirms that both advanced prompting and adapter-based fine-tuning effectively constrain the models to generate well-formed structural syntax. Consequently, the vast majority of errors (98.9\%) were semantic mismatches, where the generated JSON was valid but the extracted key-value pairs deviated from the ground-truth schema.}
 
-\textcolor{green}{The semantic mismatches were systematically categorized into two primary failure modes: action classification discrepancies and product normalization errors.}
+\textcolor{green}{The semantic mismatches were systematically categorized into two primary failure modes: action classification discrepancies and product normalization errors. A summarized typology of these recurrent failure patterns, including the observed frequency of errors across the top 15 most common mismatch categories, is presented in Table~\ref{tab:error_typology}.}
 
-\textcolor{green}{Action Classification Discrepancies: The most prevalent source of error (accounting for over 250 isolated cases) stemmed from the models' inability to map highly variable, colloquial verbs to the rigid, standardized action vocabulary defined by the schema (e.g., mapping strictly to "add" or "remove"). Models frequently extracted the literal verbs present in the synthetic prompts, such as "grab," "put," "include," "delete," or "cancel", rather than translating them into the target categorical labels. Additionally, the analysis revealed instances of semantic flipping, where models predicted the opposite action (e.g., extracting "remove" instead of "add" for the colloquial phrase "I'll take"), as well as minor case-sensitivity infractions (generating "Add" instead of the strictly lowercase "add").}
+\begin{table}[H]
+\caption{\textcolor{green}{Typology of Common Semantic Mismatches in Structured Parsing}}\label{tab:error_typology}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{l l c l l}
+\toprule
+\textbf{\textcolor{green}{Category}} & \textbf{\textcolor{green}{Failure Type}} & \textbf{\textcolor{green}{Count}} & \textbf{\textcolor{green}{Expected}} & \textbf{\textcolor{green}{Output}} \\
+\midrule
+\textcolor{green}{Action} & \textcolor{green}{Literal Verb} & \textcolor{green}{195} & \textcolor{green}{add / remove} & \textcolor{green}{grab, put, cancel} \\
+\textcolor{green}{Action} & \textcolor{green}{Semantic Flip} & \textcolor{green}{21} & \textcolor{green}{add} & \textcolor{green}{remove} \\
+\textcolor{green}{Action} & \textcolor{green}{Case Issue} & \textcolor{green}{25} & \textcolor{green}{add} & \textcolor{green}{Add} \\
+\midrule
+\textcolor{green}{Product} & \textcolor{green}{Over-extraction}& \textcolor{green}{51} & \textcolor{green}{bread} & \textcolor{green}{packs of bread} \\
+\textcolor{green}{Product} & \textcolor{green}{Tokenization} & \textcolor{green}{82} & \textcolor{green}{oliveoil} & \textcolor{green}{olive oil} \\
+\textcolor{green}{Product} & \textcolor{green}{Orthographic} & \textcolor{green}{67} & \textcolor{green}{raspberries} & \textcolor{green}{rasberries} \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-\textcolor{green}{Product Normalization Errors: The second major category of failure involved entity boundary detection and product normalization. A recurring pattern of over-extraction was observed, where models captured surrounding quantifier phrases alongside the target entity (e.g., extracting "packs of bread" or "packs of tissues" rather than the isolated terms "bread" and "tissues"). Furthermore, models struggled with the tokenization and spacing of compound words, frequently splitting merged dataset entities (such as "oliveoil," "sunfloweroil," or "brownsugar") into separate linguistic tokens (e.g., "olive oil"). Minor orthographic variations and misspellings (e.g., "rasberries" instead of "raspberries") also contributed to exact-match penalties.}
+\textcolor{green}{\textbf{Action Classification Discrepancies:} As detailed in Table~\ref{tab:error_typology}, the most prevalent source of error stemmed from the models' inability to map highly variable, colloquial verbs to the rigid, standardized action vocabulary defined by the schema. Under the "Literal Verb" failure type, models frequently extracted the literal verbs present in the synthetic prompts rather than translating them into the target categorical labels. Additionally, the analysis revealed instances of "Semantic Flipping", where models predicted the exact opposite target action for colloquial phrases like "I'll take," as well as "Case Issue" infractions, where models failed to strictly adhere to lowercase formatting constraints.}
+
+\textcolor{green}{\textbf{Product Normalization Errors:} The second major category of failure involved entity boundary detection and product normalization. A recurring pattern of "Over-extraction" was observed, where models captured surrounding quantifier phrases or nouns alongside the target entity. Furthermore, models struggled with "Tokenization" and spacing of compound words, frequently splitting merged dataset entities into separate linguistic tokens. Finally, "Orthographic" errors (minor spelling mistakes or missing characters) also contributed significantly to exact-match penalties.}
 
 \textcolor{green}{Ultimately, these failure modes highlight a critical challenge in structured semantic parsing: while current adaptation strategies easily master rigid formatting constraints, robustly mapping high-variance, out-of-distribution natural language directly to strict database schemas remains a persistent bottleneck. This validates the necessity of evaluating these models against highly diverse, colloquial datasets.}
 
